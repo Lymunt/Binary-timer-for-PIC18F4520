@@ -1,0 +1,22 @@
+main
+	lcd_init_all
+		lcd_init_r
+			lcd_cmd_4
+			pulse_e
+		lcd_cmd_4
+		pulse_e
+		lcd_cmd_my
+			lcd_cmd_4
+			pulse_e
+	lcd_char_my
+		lcd_cmd_my
+			lcd_cmd_4
+			pulse_e
+		lcd_cmd_4
+		pulse_e
+	check_keyboard
+		check_rows
+	to_binary
+	lcd_cmd_my
+		lcd_cmd_4
+		pulse_e
