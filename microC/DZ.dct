@@ -1305,6 +1305,13 @@ txreg
 txsta
 ua
 ua_bit
+uart_data_ready
+uart_in
+uart_in_direction
+uart_out
+uart_out_direction
+uart_read
+uart_write
 vcfg0
 vcfg0_bit
 vcfg1

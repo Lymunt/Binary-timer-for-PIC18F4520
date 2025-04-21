@@ -20,3 +20,7 @@ main
 	lcd_cmd_my
 		lcd_cmd_4
 		pulse_e
+	uart_data_ready
+	uart_read
+	Mul_16X16_U
+	uart_write

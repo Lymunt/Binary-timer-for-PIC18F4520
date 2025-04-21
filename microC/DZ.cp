@@ -1,4 +1,5 @@
 #line 1 "C:/Users/owner/Desktop/Git for PIC18F4520/Code-for-PIC18F4520/microC/DZ.c"
+
 sbit LCD_RS at LATB2_bit;
 sbit LCD_EN at LATB5_bit;
 sbit LCD_D4 at LATD4_bit;
@@ -12,6 +13,7 @@ sbit LCD_D4_Direction at TRISD4_bit;
 sbit LCD_D5_Direction at TRISD5_bit;
 sbit LCD_D6_Direction at TRISD6_bit;
 sbit LCD_D7_Direction at TRISD7_bit;
+
 
 sbit COL_0 at LATA0_bit;
 sbit COL_1 at LATA1_bit;
@@ -32,6 +34,13 @@ sbit ROW_0_Direction at TRISA4_bit;
 sbit ROW_1_Direction at TRISA5_bit;
 sbit ROW_2_Direction at TRISA6_bit;
 sbit ROW_3_Direction at TRISA7_bit;
+
+
+sbit UART_OUT at LATC6_bit;
+sbit UART_IN at RC7_bit;
+
+sbit UART_OUT_Direction at TRISC6_bit;
+sbit UART_IN_Direction at TRISC7_bit;
 
 void to_binary(unsigned char val, char *buffer) {
  int i = 0;
@@ -114,40 +123,30 @@ void lcd_init_all(){
 }
 
 unsigned char check_rows(){
- unsigned char row_result = 0;
-
  if(ROW_0 == 1){
- row_result = 0x10;
- return row_result;
+ return 0x10;
  }
  if(ROW_1 == 1){
- row_result = 0x14;
- return row_result;
+ return 0x14;
  }
  if(ROW_2 == 1){
- row_result = 0x18;
- return row_result;
+ return 0x18;
  }
  if(ROW_3 == 1){
- row_result = 0x1C;
- return row_result;
+ return 0x1C;
  }
- return row_result;
+ return 0;
 }
 
 unsigned char check_keyboard(){
- unsigned char keyboard_result = 0;
  unsigned char row_result = 0;
  unsigned char i = 0;
- char bin_str[9];
 
  COL_0 = 1;
  row_result = check_rows();
  if(row_result !=0){
  Delay_ms(200);
- keyboard_result = 0x00+row_result;
-
- return keyboard_result;
+ return 0x00+row_result;
  }
  COL_0 = 0;
 
@@ -155,9 +154,7 @@ unsigned char check_keyboard(){
  row_result = check_rows();
  if(row_result !=0){
  Delay_ms(200);
- keyboard_result = 0x01+row_result;
-
- return keyboard_result;
+ return 0x01+row_result;
  }
  COL_1 = 0;
 
@@ -165,9 +162,7 @@ unsigned char check_keyboard(){
  row_result = check_rows();
  if(row_result !=0){
  Delay_ms(200);
- keyboard_result = 0x02+row_result;
-
- return keyboard_result;
+ return 0x02+row_result;
  }
  COL_2 = 0;
 
@@ -175,14 +170,27 @@ unsigned char check_keyboard(){
  row_result = check_rows();
  if(row_result !=0){
  Delay_ms(200);
- keyboard_result = 0x03+row_result;
-
- return keyboard_result;
+ return 0x03+row_result;
  }
  COL_3 = 0;
 
- return keyboard_result;
+ return 0;
 }
+
+void uart_write(char my_data){
+ while (!PIR1.TXIF){}
+ TXREG = my_data;
+}
+
+char uart_read(){
+ while (!PIR1.RCIF){}
+ return RCREG;
+}
+
+char uart_data_ready(){
+ return PIR1.RCIF;
+}
+
 
 void main() {
  unsigned char count = 0;
@@ -192,6 +200,9 @@ void main() {
  unsigned char input_value = 0;
  unsigned char keyboard_result = 0;
  char bin_str[9];
+ unsigned char uart_received;
+ unsigned int uart_value = 0;
+ unsigned char second_input = 0;
 
  ADCON1 = 0x0F;
 
@@ -211,6 +222,12 @@ void main() {
  ROW_1_Direction =1;
  ROW_2_Direction =1;
  ROW_3_Direction =1;
+
+ UART_OUT_Direction = 0;
+ UART_IN_Direction = 1;
+ SPBRG = 64;
+ TXSTA = 0x20;
+ RCSTA = 0x09;
 
  lcd_init_all();
 
@@ -270,6 +287,35 @@ void main() {
 
  lcd_cmd_my(0x01);
 
+ Delay_ms(100);
+
+ j = 1;
+ lcd_char_my(1,j,'S'); j++;
+ lcd_char_my(1,j,'E'); j++;
+ lcd_char_my(1,j,'C'); j++;
+ lcd_char_my(1,j,'O'); j++;
+ lcd_char_my(1,j,'N'); j++;
+ lcd_char_my(1,j,'D'); j++;
+ lcd_char_my(1,j,':');
+
+ uart_value = 0;
+ while (1) {
+ if (uart_data_ready()) {
+ uart_received = uart_read();
+ if (uart_received >= '0' && uart_received <= '9') {
+ uart_value = uart_value * 10 + (uart_received - '0');
+ uart_write(uart_received);
+ }
+ if (uart_received == 13) {
+ second_input = uart_value;
+ break;
+ }
+ }
+ to_binary(uart_value & 0xFF, bin_str);
+ for (i = 0; i < 8; i++) lcd_char_my(2, i + 1, bin_str[i]);
+ }
+
+ lcd_cmd_my(0x01);
  Delay_ms(100);
 
  j = 1;
