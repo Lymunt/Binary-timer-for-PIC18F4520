@@ -1,4 +1,3 @@
-// LCD ??????????? ??? MicroC PRO for PIC
 sbit LCD_RS at LATB2_bit;
 sbit LCD_EN at LATB5_bit;
 sbit LCD_D4 at LATD4_bit;
@@ -33,7 +32,6 @@ sbit ROW_1_Direction at TRISA5_bit;
 sbit ROW_2_Direction at TRISA6_bit;
 sbit ROW_3_Direction at TRISA7_bit;
 
-// перевод десятичного числа в двоичное
 void to_binary(unsigned char val, char *buffer) {
      int i = 0;
      for ( i = 7; i >= 0; i--) {
@@ -116,21 +114,21 @@ void lcd_init_all(){
 
 unsigned char check_rows(){
     unsigned char row_result = 0;
-    
+
     if(ROW_0 == 1){
         row_result = 0x10;
         return row_result;
     }
     if(ROW_1 == 1){
-        row_result = 0x11;
+        row_result = 0x14;
         return row_result;
     }
     if(ROW_2 == 1){
-        row_result = 0x12;
+        row_result = 0x18;
         return row_result;
     }
     if(ROW_3 == 1){
-        row_result = 0x13;
+        row_result = 0x1C;
         return row_result;
     }
     return row_result;
@@ -139,48 +137,49 @@ unsigned char check_rows(){
 unsigned char check_keyboard(){
     unsigned char keyboard_result = 0;
     unsigned char row_result = 0;
-    
-    
+    unsigned char i = 0;
+    char bin_str[9];
+
     COL_0 = 1;
     row_result =  check_rows();
     if(row_result !=0){
-       row_result = row_result & 0x00FF;
-       Delay_ms(20);
-       keyboard_result = 0x10+row_result;
+       Delay_ms(200);
+       keyboard_result = 0x00+row_result;
+
        return keyboard_result;
     }
     COL_0 = 0;
-    
+
     COL_1 = 1;
     row_result =  check_rows();
     if(row_result !=0){
-       row_result = row_result & 0x00FF;
-       Delay_ms(20);
-       keyboard_result = 0x14+row_result;
+       Delay_ms(200);
+       keyboard_result = 0x01+row_result;
+
        return keyboard_result;
     }
     COL_1 = 0;
-    
+
     COL_2 = 1;
     row_result =  check_rows();
     if(row_result !=0){
-       row_result = row_result & 0x00FF;
-       Delay_ms(20);
-       keyboard_result = 0x18+row_result;
+       Delay_ms(200);
+       keyboard_result = 0x02+row_result;
+
        return keyboard_result;
     }
     COL_2 = 0;
-    
+
     COL_3 = 1;
     row_result =  check_rows();
     if(row_result !=0){
-       row_result = row_result & 0x00FF;
-       Delay_ms(20);
-       keyboard_result = 0x1C+row_result;
+       Delay_ms(200);
+       keyboard_result = 0x03+row_result;
+
        return keyboard_result;
     }
     COL_3 = 0;
-    
+
     return keyboard_result;
 }
 
@@ -192,7 +191,7 @@ void main() {
      unsigned char input_value = 0;
      unsigned char keyboard_result = 0;
      char bin_str[9];
-     
+
      ADCON1 = 0x0F;
 
      LCD_RS_Direction =0;
@@ -201,21 +200,21 @@ void main() {
      LCD_D5_Direction =0;
      LCD_D6_Direction =0;
      LCD_D7_Direction =0;
-     
+
      COL_0_Direction =0;
      COL_1_Direction =0;
      COL_2_Direction =0;
      COL_3_Direction =0;
-     
+
      ROW_0_Direction =1;
      ROW_1_Direction =1;
      ROW_2_Direction =1;
      ROW_3_Direction =1;
 
      lcd_init_all();
-     
+
      Delay_ms(10);
-     
+
      lcd_char_my(1,j,'S');
      j++;
      lcd_char_my(1,j,'E');
@@ -231,19 +230,16 @@ void main() {
      while (keyboard_result !=0x12) {
          lcd_char_my(1, 6, k);
          k++;
-         
+
          keyboard_result = check_keyboard();
 
          if (keyboard_result == 0x10) {
-             Delay_ms(200);
              input_value <<= 1;
          }
          if (keyboard_result == 0x11) {
-             Delay_ms(200);
              input_value = (input_value << 1) | 1;
          }
          if (keyboard_result == 0x12) {
-             Delay_ms(200);
              count = input_value;
              lcd_char_my(1, j, 'S');
              j++;
@@ -274,7 +270,7 @@ void main() {
      lcd_cmd_my(0x01);
 
      Delay_ms(100);
-     
+
      j = 1;
      lcd_char_my(1, j, 'B');
      j++;

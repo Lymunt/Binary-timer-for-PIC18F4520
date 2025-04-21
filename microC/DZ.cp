@@ -1,5 +1,4 @@
-#line 1 "C:/Users/owner/Desktop/ИВТ 3 курс/Микроконтролерные системы/Домашняя работа/microC/DZ.c"
-
+#line 1 "C:/Users/owner/Desktop/Git for PIC18F4520/Code-for-PIC18F4520/microC/DZ.c"
 sbit LCD_RS at LATB2_bit;
 sbit LCD_EN at LATB5_bit;
 sbit LCD_D4 at LATD4_bit;
@@ -33,7 +32,6 @@ sbit ROW_0_Direction at TRISA4_bit;
 sbit ROW_1_Direction at TRISA5_bit;
 sbit ROW_2_Direction at TRISA6_bit;
 sbit ROW_3_Direction at TRISA7_bit;
-
 
 void to_binary(unsigned char val, char *buffer) {
  int i = 0;
@@ -123,15 +121,15 @@ unsigned char check_rows(){
  return row_result;
  }
  if(ROW_1 == 1){
- row_result = 0x11;
+ row_result = 0x14;
  return row_result;
  }
  if(ROW_2 == 1){
- row_result = 0x12;
+ row_result = 0x18;
  return row_result;
  }
  if(ROW_3 == 1){
- row_result = 0x13;
+ row_result = 0x1C;
  return row_result;
  }
  return row_result;
@@ -140,14 +138,15 @@ unsigned char check_rows(){
 unsigned char check_keyboard(){
  unsigned char keyboard_result = 0;
  unsigned char row_result = 0;
-
+ unsigned char i = 0;
+ char bin_str[9];
 
  COL_0 = 1;
  row_result = check_rows();
  if(row_result !=0){
- row_result = row_result & 0x00FF;
- Delay_ms(20);
- keyboard_result = 0x10+row_result;
+ Delay_ms(200);
+ keyboard_result = 0x00+row_result;
+
  return keyboard_result;
  }
  COL_0 = 0;
@@ -155,9 +154,9 @@ unsigned char check_keyboard(){
  COL_1 = 1;
  row_result = check_rows();
  if(row_result !=0){
- row_result = row_result & 0x00FF;
- Delay_ms(20);
- keyboard_result = 0x14+row_result;
+ Delay_ms(200);
+ keyboard_result = 0x01+row_result;
+
  return keyboard_result;
  }
  COL_1 = 0;
@@ -165,9 +164,9 @@ unsigned char check_keyboard(){
  COL_2 = 1;
  row_result = check_rows();
  if(row_result !=0){
- row_result = row_result & 0x00FF;
- Delay_ms(20);
- keyboard_result = 0x18+row_result;
+ Delay_ms(200);
+ keyboard_result = 0x02+row_result;
+
  return keyboard_result;
  }
  COL_2 = 0;
@@ -175,9 +174,9 @@ unsigned char check_keyboard(){
  COL_3 = 1;
  row_result = check_rows();
  if(row_result !=0){
- row_result = row_result & 0x00FF;
- Delay_ms(20);
- keyboard_result = 0x1C+row_result;
+ Delay_ms(200);
+ keyboard_result = 0x03+row_result;
+
  return keyboard_result;
  }
  COL_3 = 0;
@@ -236,15 +235,12 @@ void main() {
  keyboard_result = check_keyboard();
 
  if (keyboard_result == 0x10) {
- Delay_ms(200);
  input_value <<= 1;
  }
  if (keyboard_result == 0x11) {
- Delay_ms(200);
  input_value = (input_value << 1) | 1;
  }
  if (keyboard_result == 0x12) {
- Delay_ms(200);
  count = input_value;
  lcd_char_my(1, j, 'S');
  j++;
