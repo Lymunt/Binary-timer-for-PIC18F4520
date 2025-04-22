@@ -1,4 +1,6 @@
 main
+	__CC2DW
+	uart_init
 	lcd_init_all
 		lcd_init_r
 			lcd_cmd_4
@@ -20,7 +22,5 @@ main
 	lcd_cmd_my
 		lcd_cmd_4
 		pulse_e
-	uart_data_ready
-	uart_read
 	Mul_16X16_U
-	uart_write
+interrupt

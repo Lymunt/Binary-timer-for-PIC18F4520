@@ -469,6 +469,7 @@ intedg1
 intedg1_bit
 intedg2
 intedg2_bit
+interrupt
 intsrc
 intsrc_bit
 iofs
@@ -1305,13 +1306,13 @@ txreg
 txsta
 ua
 ua_bit
-uart_data_ready
+uart_char
 uart_in
 uart_in_direction
+uart_init
 uart_out
 uart_out_direction
-uart_read
-uart_write
+uart_ready
 vcfg0
 vcfg0_bit
 vcfg1
