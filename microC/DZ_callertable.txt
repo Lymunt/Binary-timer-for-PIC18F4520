@@ -22,5 +22,4 @@ main
 	lcd_cmd_my
 		lcd_cmd_4
 		pulse_e
-	Mul_16X16_U
 interrupt

@@ -993,6 +993,7 @@ sdi_bit
 sdiv3232l
 sdo
 sdo_bit
+second_input
 sen
 sen_bit
 sendb
@@ -1306,7 +1307,6 @@ txreg
 txsta
 ua
 ua_bit
-uart_char
 uart_in
 uart_in_direction
 uart_init
