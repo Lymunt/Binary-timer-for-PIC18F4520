@@ -1,25 +1,39 @@
 main
 	__CC2DW
+	timer_init
 	uart_init
 	lcd_init_all
+		delay_ms_manual
+			delay_40us
 		lcd_init_r
 			lcd_cmd_4
 			pulse_e
+				delay_40us
+			delay_40us
 		lcd_cmd_4
 		pulse_e
+			delay_40us
 		lcd_cmd_my
 			lcd_cmd_4
 			pulse_e
+				delay_40us
+	delay_ms_manual
+		delay_40us
 	lcd_char_my
 		lcd_cmd_my
 			lcd_cmd_4
 			pulse_e
+				delay_40us
 		lcd_cmd_4
 		pulse_e
+			delay_40us
 	check_keyboard
 		check_rows
+		delay_ms_manual
+			delay_40us
 	to_binary
 	lcd_cmd_my
 		lcd_cmd_4
 		pulse_e
+			delay_40us
 interrupt

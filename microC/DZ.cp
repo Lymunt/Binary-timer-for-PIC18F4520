@@ -51,6 +51,29 @@ void interrupt() {
  }
 }
 
+void timer_init(){
+ T0CON = 0b00000000;
+}
+
+void delay_40us() {
+ T1CON.TMR1ON = 0;
+ TMR1H = 0xFF;
+ TMR1L = 0xD8;
+ PIR1.TMR1IF = 0;
+ T1CON.TMR1ON = 1;
+
+ while (!PIR1.TMR1IF);
+}
+
+void delay_ms_manual(unsigned int ms) {
+ unsigned int i, j;
+ for (i = 0; i < ms; i++) {
+ for (j = 0; j < 25; j++) {
+ delay_40us();
+ }
+ }
+}
+
 void to_binary(unsigned char val, char *buffer) {
  int i = 0;
  for ( i = 7; i >= 0; i--) {
@@ -61,9 +84,9 @@ void to_binary(unsigned char val, char *buffer) {
 
 void pulse_e() {
  LCD_EN = 1;
- Delay_us(1);
+ delay_40us();
  LCD_EN = 0;
- Delay_us(40);
+ delay_40us();
 
 }
 
@@ -106,12 +129,12 @@ void lcd_init_r(){
 
  pulse_e();
 
- Delay_us(40);
+ delay_40us();
 }
 
 void lcd_init_all(){
 
- Delay_ms(20);
+ delay_ms_manual(20);
 
  lcd_init_r();
 
@@ -162,7 +185,7 @@ void lcd_init_all(){
  COL_0 = 1;
  row_result = check_rows();
  if(row_result !=0){
- Delay_ms(200);
+ delay_ms_manual(200);
  keyboard_result = 0x00+row_result;
 
  return keyboard_result;
@@ -172,7 +195,7 @@ void lcd_init_all(){
  COL_1 = 1;
  row_result = check_rows();
  if(row_result !=0){
- Delay_ms(200);
+ delay_ms_manual(200);
  keyboard_result = 0x01+row_result;
 
  return keyboard_result;
@@ -182,7 +205,7 @@ void lcd_init_all(){
  COL_2 = 1;
  row_result = check_rows();
  if(row_result !=0){
- Delay_ms(200);
+ delay_ms_manual(200);
  keyboard_result = 0x02+row_result;
 
  return keyboard_result;
@@ -192,7 +215,7 @@ void lcd_init_all(){
  COL_3 = 1;
  row_result = check_rows();
  if(row_result !=0){
- Delay_ms(200);
+ delay_ms_manual(200);
  keyboard_result = 0x03+row_result;
 
  return keyboard_result;
@@ -249,11 +272,13 @@ void main() {
 
  TRISD.B0 = 0;
 
+ timer_init();
+
  uart_init();
 
  lcd_init_all();
 
- Delay_ms(10);
+ delay_ms_manual(10);
 
  while(1){
  i = 0;
@@ -277,7 +302,7 @@ void main() {
 
  j=1;
 
- Delay_ms(10);
+ delay_ms_manual(10);
 
  while (keyboard_result !=0x12) {
  lcd_char_my(1, 6, k);
@@ -307,7 +332,7 @@ void main() {
  lcd_char_my(1, j, 'N');
  j++;
  lcd_char_my(1, j, 'G');
- Delay_ms(2000);
+ delay_ms_manual(2000);
  }
 
  if(keyboard_result == 0x13){
@@ -326,7 +351,7 @@ void main() {
  lcd_char_my(1,j,' '); j++;
  lcd_char_my(1,j,' '); j++;
  lcd_char_my(1,j,' '); j++;
- Delay_ms(2000);
+ delay_ms_manual(2000);
  input_value = 0;
  break;
  }
@@ -341,7 +366,7 @@ void main() {
 
  lcd_cmd_my(0x01);
 
- Delay_ms(100);
+ delay_ms_manual(100);
 
  j = 1;
  lcd_char_my(1,j,'S'); j++;
@@ -374,7 +399,7 @@ void main() {
  lcd_char_my(1,j,' '); j++;
  lcd_char_my(1,j,' '); j++;
  lcd_char_my(1,j,' '); j++;
- Delay_ms(2000);
+ delay_ms_manual(2000);
  break;
  }
 
@@ -402,13 +427,13 @@ void main() {
  j++;
  lcd_char_my(1, j, ' ');
 
- Delay_ms(2000);
+ delay_ms_manual(2000);
  break;
  }
  }
 
  lcd_cmd_my(0x01);
- Delay_ms(100);
+ delay_ms_manual(100);
 
  j = 1;
  lcd_char_my(1, j, 'B');
@@ -437,7 +462,7 @@ void main() {
  for (i = 0; i < 8; i++) {
  lcd_char_my(2, i + 2, bin_str[i]);
  }
- Delay_ms(1000);
+ delay_ms_manual(1000);
 
  if(second_input==count){
  j = 1;
@@ -447,7 +472,7 @@ void main() {
  j++;
  lcd_char_my(2, j, 'Y');
  j++;
- Delay_ms(1000);
+ delay_ms_manual(1000);
  }
 
  if(second_input<count){
@@ -458,7 +483,7 @@ void main() {
  j++;
  lcd_char_my(2, j, 'Y');
  j++;
- Delay_ms(1000);
+ delay_ms_manual(1000);
  }
 
  while (count<second_input) {
@@ -480,7 +505,7 @@ void main() {
  lcd_char_my(1,j,' '); j++;
  lcd_char_my(1,j,' '); j++;
  lcd_char_my(1,j,' '); j++;
- Delay_ms(5000);
+ delay_ms_manual(5000);
  break;
  }
  count++;
@@ -491,11 +516,11 @@ void main() {
  lcd_char_my(2, i + 2, bin_str[i]);
  }
 
- Delay_ms(1000);
+ delay_ms_manual(1000);
 
  }
  lcd_cmd_my(0x01);
- Delay_ms(100);
+ delay_ms_manual(100);
 
  j = 1;
  lcd_char_my(1,j,'R'); j++;
@@ -511,6 +536,6 @@ void main() {
 
  lcd_cmd_my(0x01);
 
- Delay_ms(100);
+ delay_ms_manual(1000);
  }
 }
