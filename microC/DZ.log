@@ -1,13 +1,13 @@
-0	1	mikroCPIC1618.exe -MSF -DBG -pP18F4520 -DL -O11111114 -fo10 -N"C:\Users\owner\Desktop\Git for PIC18F4520\Code-for-PIC18F4520\microC\DZ.mcppi" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\Defs\" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\uses\P18\" -SP"C:\Users\owner\Desktop\Git for PIC18F4520\Code-for-PIC18F4520\microC\" -IP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\uses\P18\" "DZ.c" "__Lib_Math.mcl" "__Lib_MathDouble.mcl" "__Lib_System.mcl" "__Lib_Delays.mcl" "__Lib_LcdConsts.mcl" "__Lib_Lcd.mcl"	 
+0	1	mikroCPIC1618.exe -MSF -DBG -pP18F4520 -DL -O11111114 -fo10 -N"C:\Users\owner\Desktop\Git for PIC18F4520\Code-for-PIC18F4520\microC\DZ.mcppi" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\Defs\" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\uses\P18\" -SP"C:\Users\owner\Desktop\Git for PIC18F4520\Code-for-PIC18F4520\microC\" -IP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\uses\P18\" "DZ.c" "__Lib_Math.mcl" "__Lib_MathDouble.mcl" "__Lib_System.mcl" "__Lib_Delays.mcl" "__Lib_UART_c67.mcl" "__Lib_LcdConsts.mcl" "__Lib_Lcd.mcl"	 
 hint: 0	1139	Available RAM: 1515 [bytes], Available ROM: 32768 [bytes]	 
 diagnostics: 0	122	Compilation Started	DZ.c
 hint: 159	1163	Variable 'bin_str' has been declared, but not used	DZ.c
-diagnostics: 478	123	Compiled Successfully	DZ.c
+diagnostics: 515	123	Compiled Successfully	DZ.c
 hint: 158	1164	Variable 'i' has been eliminated by optimizer	DZ.c
-diagnostics: 0	127	All files Compiled in 203 ms	 
+diagnostics: 0	127	All files Compiled in 329 ms	 
 hint: 0	1144	Used RAM (bytes): 24 (2%)  Free RAM (bytes): 1491 (98%)	Used RAM (bytes): 24 (2%)  Free RAM (bytes): 1491 (98%)
-hint: 0	1144	Used ROM (bytes): 2942 (9%)  Free ROM (bytes): 29826 (91%)	Used ROM (bytes): 2942 (9%)  Free ROM (bytes): 29826 (91%)
+hint: 0	1144	Used ROM (bytes): 3344 (10%)  Free ROM (bytes): 29424 (90%)	Used ROM (bytes): 3344 (10%)  Free ROM (bytes): 29424 (90%)
 diagnostics: 0	125	Project Linked Successfully	DZ.mcppi
-diagnostics: 0	128	Linked in 125 ms	 
-diagnostics: 0	129	Project 'DZ.mcppi' completed: 469 ms	 
-diagnostics: 0	103	Finished successfully: 29 апр 2025, 15:25:04	DZ.mcppi
+diagnostics: 0	128	Linked in 46 ms	 
+diagnostics: 0	129	Project 'DZ.mcppi' completed: 531 ms	 
+diagnostics: 0	103	Finished successfully: 13 май 2025, 00:51:36	DZ.mcppi

@@ -437,6 +437,28 @@ void main() {
                         lcd_char_my(2, i + 2, bin_str[i]);
                     }
                     Delay_ms(1000);
+                    
+                    if(second_input==count){
+                        j = 1;
+                        lcd_char_my(2, j, 'X');
+                        j++;
+                        lcd_char_my(2, j, '=');
+                        j++;
+                        lcd_char_my(2, j, 'Y');
+                        j++;
+                        Delay_ms(1000);
+                    }
+                    
+                    if(second_input<count){
+                        j = 1;
+                        lcd_char_my(2, j, 'X');
+                        j++;
+                        lcd_char_my(2, j, '<');
+                        j++;
+                        lcd_char_my(2, j, 'Y');
+                        j++;
+                        Delay_ms(1000);
+                    }
 
                     while (count<second_input) {
                           keyboard_result = check_keyboard();
@@ -471,6 +493,21 @@ void main() {
                           Delay_ms(1000);
 
                     }
+                    lcd_cmd_my(0x01);
+                    Delay_ms(100);
+                    
+                    j = 1;
+                    lcd_char_my(1,j,'R'); j++;
+                    lcd_char_my(1,j,'E'); j++;
+                    lcd_char_my(1,j,'S'); j++;
+                    lcd_char_my(1,j,'T'); j++;
+                    lcd_char_my(1,j,'A'); j++;
+                    lcd_char_my(1,j,'R'); j++;
+                    lcd_char_my(1,j,'T'); j++;
+                    lcd_char_my(1,j,'I'); j++;
+                    lcd_char_my(1,j,'N'); j++;
+                    lcd_char_my(1,j,'G'); j++;
+                    
                     lcd_cmd_my(0x01);
 
                     Delay_ms(100);

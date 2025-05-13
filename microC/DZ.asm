@@ -14,7 +14,7 @@ _interrupt:
 L_interrupt0:
 ;DZ.c,51 :: 		}
 L_end_interrupt:
-L__interrupt64:
+L__interrupt69:
 	RETFIE      1
 ; end of _interrupt
 
@@ -36,10 +36,10 @@ L_to_binary1:
 	MOVLW       128
 	SUBWF       R0, 0 
 	BTFSS       STATUS+0, 2 
-	GOTO        L__to_binary66
+	GOTO        L__to_binary71
 	MOVLW       0
 	SUBWF       to_binary_i_L0+0, 0 
-L__to_binary66:
+L__to_binary71:
 	BTFSS       STATUS+0, 0 
 	GOTO        L_to_binary2
 ;DZ.c,56 :: 		buffer[7 - i] = (val & (1 << i)) ? '1' : '0';
@@ -63,14 +63,14 @@ L__to_binary66:
 	MOVLW       0
 	MOVWF       R1 
 	MOVF        R2, 0 
-L__to_binary67:
-	BZ          L__to_binary68
+L__to_binary72:
+	BZ          L__to_binary73
 	RLCF        R0, 1 
 	BCF         R0, 0 
 	RLCF        R1, 1 
 	ADDLW       255
-	GOTO        L__to_binary67
-L__to_binary68:
+	GOTO        L__to_binary72
+L__to_binary73:
 	MOVF        FARG_to_binary_val+0, 0 
 	ANDWF       R0, 1 
 	MOVLW       0
@@ -140,12 +140,12 @@ _lcd_cmd_4:
 	ANDWF       FARG_lcd_cmd_4_cmd+0, 0 
 	MOVWF       R0 
 	BTFSC       R0, 0 
-	GOTO        L__lcd_cmd_471
+	GOTO        L__lcd_cmd_476
 	BCF         LATD4_bit+0, BitPos(LATD4_bit+0) 
-	GOTO        L__lcd_cmd_472
-L__lcd_cmd_471:
+	GOTO        L__lcd_cmd_477
+L__lcd_cmd_476:
 	BSF         LATD4_bit+0, BitPos(LATD4_bit+0) 
-L__lcd_cmd_472:
+L__lcd_cmd_477:
 ;DZ.c,71 :: 		LCD_D5 = (cmd >> 1) & 1;
 	MOVF        FARG_lcd_cmd_4_cmd+0, 0 
 	MOVWF       R0 
@@ -154,12 +154,12 @@ L__lcd_cmd_472:
 	MOVLW       1
 	ANDWF       R0, 1 
 	BTFSC       R0, 0 
-	GOTO        L__lcd_cmd_473
+	GOTO        L__lcd_cmd_478
 	BCF         LATD5_bit+0, BitPos(LATD5_bit+0) 
-	GOTO        L__lcd_cmd_474
-L__lcd_cmd_473:
+	GOTO        L__lcd_cmd_479
+L__lcd_cmd_478:
 	BSF         LATD5_bit+0, BitPos(LATD5_bit+0) 
-L__lcd_cmd_474:
+L__lcd_cmd_479:
 ;DZ.c,72 :: 		LCD_D6 = (cmd >> 2) & 1;
 	MOVF        FARG_lcd_cmd_4_cmd+0, 0 
 	MOVWF       R0 
@@ -170,12 +170,12 @@ L__lcd_cmd_474:
 	MOVLW       1
 	ANDWF       R0, 1 
 	BTFSC       R0, 0 
-	GOTO        L__lcd_cmd_475
+	GOTO        L__lcd_cmd_480
 	BCF         LATD6_bit+0, BitPos(LATD6_bit+0) 
-	GOTO        L__lcd_cmd_476
-L__lcd_cmd_475:
+	GOTO        L__lcd_cmd_481
+L__lcd_cmd_480:
 	BSF         LATD6_bit+0, BitPos(LATD6_bit+0) 
-L__lcd_cmd_476:
+L__lcd_cmd_481:
 ;DZ.c,73 :: 		LCD_D7 = (cmd >> 3) & 1;
 	MOVF        FARG_lcd_cmd_4_cmd+0, 0 
 	MOVWF       R0 
@@ -188,12 +188,12 @@ L__lcd_cmd_476:
 	MOVLW       1
 	ANDWF       R0, 1 
 	BTFSC       R0, 0 
-	GOTO        L__lcd_cmd_477
+	GOTO        L__lcd_cmd_482
 	BCF         LATD7_bit+0, BitPos(LATD7_bit+0) 
-	GOTO        L__lcd_cmd_478
-L__lcd_cmd_477:
+	GOTO        L__lcd_cmd_483
+L__lcd_cmd_482:
 	BSF         LATD7_bit+0, BitPos(LATD7_bit+0) 
-L__lcd_cmd_478:
+L__lcd_cmd_483:
 ;DZ.c,74 :: 		}
 L_end_lcd_cmd_4:
 	RETURN      0
@@ -1671,156 +1671,105 @@ L_main53:
 	DECFSZ      R11, 1, 1
 	BRA         L_main53
 	NOP
-;DZ.c,441 :: 		while (count<second_input) {
-L_main54:
+;DZ.c,441 :: 		if(second_input==count){
 	MOVF        _second_input+0, 0 
-	SUBWF       main_count_L0+0, 0 
-	BTFSC       STATUS+0, 0 
-	GOTO        L_main55
-;DZ.c,442 :: 		keyboard_result = check_keyboard();
-	CALL        _check_keyboard+0, 0
-	MOVF        R0, 0 
-	MOVWF       main_keyboard_result_L0+0 
-;DZ.c,443 :: 		if(keyboard_result == 0x13){
-	MOVF        R0, 0 
-	XORLW       19
+	XORWF       main_count_L0+0, 0 
 	BTFSS       STATUS+0, 2 
-	GOTO        L_main56
-;DZ.c,444 :: 		j = 1;
+	GOTO        L_main54
+;DZ.c,442 :: 		j = 1;
 	MOVLW       1
 	MOVWF       main_j_L0+0 
-;DZ.c,445 :: 		lcd_char_my(1,j,'B'); j++;
-	MOVLW       1
+;DZ.c,443 :: 		lcd_char_my(2, j, 'X');
+	MOVLW       2
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       66
+	MOVLW       88
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
+;DZ.c,444 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,446 :: 		lcd_char_my(1,j,'R'); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       82
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,447 :: 		lcd_char_my(1,j,'E'); j++;
-	MOVLW       1
+;DZ.c,445 :: 		lcd_char_my(2, j, '=');
+	MOVLW       2
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
 	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       69
+	MOVLW       61
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
+;DZ.c,446 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,448 :: 		lcd_char_my(1,j,'A'); j++;
-	MOVLW       1
+;DZ.c,447 :: 		lcd_char_my(2, j, 'Y');
+	MOVLW       2
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
 	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       65
+	MOVLW       89
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
+;DZ.c,448 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,449 :: 		lcd_char_my(1,j,'K'); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       75
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,450 :: 		lcd_char_my(1,j,'I'); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       73
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,451 :: 		lcd_char_my(1,j,'N'); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       78
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,452 :: 		lcd_char_my(1,j,'G'); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       71
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,453 :: 		lcd_char_my(1,j,' '); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       32
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,455 :: 		lcd_char_my(1,j,' '); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       32
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,456 :: 		lcd_char_my(1,j,' '); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       32
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,457 :: 		lcd_char_my(1,j,' '); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       32
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,458 :: 		lcd_char_my(1,j,' '); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       32
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,459 :: 		lcd_char_my(1,j,' '); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       32
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,460 :: 		Delay_ms(5000);
-	MOVLW       64
+;DZ.c,449 :: 		Delay_ms(1000);
+	MOVLW       13
 	MOVWF       R11, 0
-	MOVLW       106
+	MOVLW       175
 	MOVWF       R12, 0
-	MOVLW       151
+	MOVLW       182
+	MOVWF       R13, 0
+L_main55:
+	DECFSZ      R13, 1, 1
+	BRA         L_main55
+	DECFSZ      R12, 1, 1
+	BRA         L_main55
+	DECFSZ      R11, 1, 1
+	BRA         L_main55
+	NOP
+;DZ.c,450 :: 		}
+L_main54:
+;DZ.c,452 :: 		if(second_input<count){
+	MOVF        main_count_L0+0, 0 
+	SUBWF       _second_input+0, 0 
+	BTFSC       STATUS+0, 0 
+	GOTO        L_main56
+;DZ.c,453 :: 		j = 1;
+	MOVLW       1
+	MOVWF       main_j_L0+0 
+;DZ.c,454 :: 		lcd_char_my(2, j, 'X');
+	MOVLW       2
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       88
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+;DZ.c,455 :: 		j++;
+	INCF        main_j_L0+0, 1 
+;DZ.c,456 :: 		lcd_char_my(2, j, '<');
+	MOVLW       2
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       60
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+;DZ.c,457 :: 		j++;
+	INCF        main_j_L0+0, 1 
+;DZ.c,458 :: 		lcd_char_my(2, j, 'Y');
+	MOVLW       2
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       89
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+;DZ.c,459 :: 		j++;
+	INCF        main_j_L0+0, 1 
+;DZ.c,460 :: 		Delay_ms(1000);
+	MOVLW       13
+	MOVWF       R11, 0
+	MOVLW       175
+	MOVWF       R12, 0
+	MOVLW       182
 	MOVWF       R13, 0
 L_main57:
 	DECFSZ      R13, 1, 1
@@ -1830,14 +1779,175 @@ L_main57:
 	DECFSZ      R11, 1, 1
 	BRA         L_main57
 	NOP
-	NOP
-;DZ.c,461 :: 		break;
-	GOTO        L_main55
-;DZ.c,462 :: 		}
+;DZ.c,461 :: 		}
 L_main56:
-;DZ.c,463 :: 		count++;
+;DZ.c,463 :: 		while (count<second_input) {
+L_main58:
+	MOVF        _second_input+0, 0 
+	SUBWF       main_count_L0+0, 0 
+	BTFSC       STATUS+0, 0 
+	GOTO        L_main59
+;DZ.c,464 :: 		keyboard_result = check_keyboard();
+	CALL        _check_keyboard+0, 0
+	MOVF        R0, 0 
+	MOVWF       main_keyboard_result_L0+0 
+;DZ.c,465 :: 		if(keyboard_result == 0x13){
+	MOVF        R0, 0 
+	XORLW       19
+	BTFSS       STATUS+0, 2 
+	GOTO        L_main60
+;DZ.c,466 :: 		j = 1;
+	MOVLW       1
+	MOVWF       main_j_L0+0 
+;DZ.c,467 :: 		lcd_char_my(1,j,'B'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       66
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,468 :: 		lcd_char_my(1,j,'R'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       82
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,469 :: 		lcd_char_my(1,j,'E'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       69
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,470 :: 		lcd_char_my(1,j,'A'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       65
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,471 :: 		lcd_char_my(1,j,'K'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       75
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,472 :: 		lcd_char_my(1,j,'I'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       73
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,473 :: 		lcd_char_my(1,j,'N'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       78
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,474 :: 		lcd_char_my(1,j,'G'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       71
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,475 :: 		lcd_char_my(1,j,' '); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       32
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,477 :: 		lcd_char_my(1,j,' '); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       32
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,478 :: 		lcd_char_my(1,j,' '); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       32
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,479 :: 		lcd_char_my(1,j,' '); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       32
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,480 :: 		lcd_char_my(1,j,' '); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       32
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,481 :: 		lcd_char_my(1,j,' '); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       32
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,482 :: 		Delay_ms(5000);
+	MOVLW       64
+	MOVWF       R11, 0
+	MOVLW       106
+	MOVWF       R12, 0
+	MOVLW       151
+	MOVWF       R13, 0
+L_main61:
+	DECFSZ      R13, 1, 1
+	BRA         L_main61
+	DECFSZ      R12, 1, 1
+	BRA         L_main61
+	DECFSZ      R11, 1, 1
+	BRA         L_main61
+	NOP
+	NOP
+;DZ.c,483 :: 		break;
+	GOTO        L_main59
+;DZ.c,484 :: 		}
+L_main60:
+;DZ.c,485 :: 		count++;
 	INCF        main_count_L0+0, 1 
-;DZ.c,465 :: 		to_binary(count, bin_str);
+;DZ.c,487 :: 		to_binary(count, bin_str);
 	MOVF        main_count_L0+0, 0 
 	MOVWF       FARG_to_binary_val+0 
 	MOVLW       main_bin_str_L0+0
@@ -1845,14 +1955,14 @@ L_main56:
 	MOVLW       hi_addr(main_bin_str_L0+0)
 	MOVWF       FARG_to_binary_buffer+1 
 	CALL        _to_binary+0, 0
-;DZ.c,467 :: 		for (i = 0; i < 8; i++) {
+;DZ.c,489 :: 		for (i = 0; i < 8; i++) {
 	CLRF        main_i_L0+0 
-L_main58:
+L_main62:
 	MOVLW       8
 	SUBWF       main_i_L0+0, 0 
 	BTFSC       STATUS+0, 0 
-	GOTO        L_main59
-;DZ.c,468 :: 		lcd_char_my(2, i + 2, bin_str[i]);
+	GOTO        L_main63
+;DZ.c,490 :: 		lcd_char_my(2, i + 2, bin_str[i]);
 	MOVLW       2
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVLW       2
@@ -1869,52 +1979,165 @@ L_main58:
 	MOVF        POSTINC0+0, 0 
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,467 :: 		for (i = 0; i < 8; i++) {
+;DZ.c,489 :: 		for (i = 0; i < 8; i++) {
 	INCF        main_i_L0+0, 1 
-;DZ.c,469 :: 		}
-	GOTO        L_main58
-L_main59:
-;DZ.c,471 :: 		Delay_ms(1000);
+;DZ.c,491 :: 		}
+	GOTO        L_main62
+L_main63:
+;DZ.c,493 :: 		Delay_ms(1000);
 	MOVLW       13
 	MOVWF       R11, 0
 	MOVLW       175
 	MOVWF       R12, 0
 	MOVLW       182
 	MOVWF       R13, 0
-L_main61:
+L_main65:
 	DECFSZ      R13, 1, 1
-	BRA         L_main61
+	BRA         L_main65
 	DECFSZ      R12, 1, 1
-	BRA         L_main61
+	BRA         L_main65
 	DECFSZ      R11, 1, 1
-	BRA         L_main61
+	BRA         L_main65
 	NOP
-;DZ.c,473 :: 		}
-	GOTO        L_main54
-L_main55:
-;DZ.c,474 :: 		lcd_cmd_my(0x01);
+;DZ.c,495 :: 		}
+	GOTO        L_main58
+L_main59:
+;DZ.c,496 :: 		lcd_cmd_my(0x01);
 	MOVLW       1
 	MOVWF       FARG_lcd_cmd_my_cmd+0 
 	CALL        _lcd_cmd_my+0, 0
-;DZ.c,476 :: 		Delay_ms(100);
+;DZ.c,497 :: 		Delay_ms(100);
 	MOVLW       2
 	MOVWF       R11, 0
 	MOVLW       69
 	MOVWF       R12, 0
 	MOVLW       169
 	MOVWF       R13, 0
-L_main62:
+L_main66:
 	DECFSZ      R13, 1, 1
-	BRA         L_main62
+	BRA         L_main66
 	DECFSZ      R12, 1, 1
-	BRA         L_main62
+	BRA         L_main66
 	DECFSZ      R11, 1, 1
-	BRA         L_main62
+	BRA         L_main66
 	NOP
 	NOP
-;DZ.c,477 :: 		}
+;DZ.c,499 :: 		j = 1;
+	MOVLW       1
+	MOVWF       main_j_L0+0 
+;DZ.c,500 :: 		lcd_char_my(1,j,'R'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       82
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,501 :: 		lcd_char_my(1,j,'E'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       69
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,502 :: 		lcd_char_my(1,j,'S'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       83
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,503 :: 		lcd_char_my(1,j,'T'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       84
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,504 :: 		lcd_char_my(1,j,'A'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       65
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,505 :: 		lcd_char_my(1,j,'R'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       82
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,506 :: 		lcd_char_my(1,j,'T'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       84
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,507 :: 		lcd_char_my(1,j,'I'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       73
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,508 :: 		lcd_char_my(1,j,'N'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       78
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,509 :: 		lcd_char_my(1,j,'G'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       71
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,511 :: 		lcd_cmd_my(0x01);
+	MOVLW       1
+	MOVWF       FARG_lcd_cmd_my_cmd+0 
+	CALL        _lcd_cmd_my+0, 0
+;DZ.c,513 :: 		Delay_ms(100);
+	MOVLW       2
+	MOVWF       R11, 0
+	MOVLW       69
+	MOVWF       R12, 0
+	MOVLW       169
+	MOVWF       R13, 0
+L_main67:
+	DECFSZ      R13, 1, 1
+	BRA         L_main67
+	DECFSZ      R12, 1, 1
+	BRA         L_main67
+	DECFSZ      R11, 1, 1
+	BRA         L_main67
+	NOP
+	NOP
+;DZ.c,514 :: 		}
 	GOTO        L_main25
-;DZ.c,478 :: 		}
+;DZ.c,515 :: 		}
 L_end_main:
 	GOTO        $+0
 ; end of _main
