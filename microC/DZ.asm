@@ -7,21 +7,21 @@ _interrupt:
 	GOTO        L_interrupt0
 ;DZ.c,48 :: 		uart_ready++;
 	INCF        _uart_ready+0, 1 
-;DZ.c,49 :: 		second_input =  RCREG;
+;DZ.c,49 :: 		uart_input =  RCREG;
 	MOVF        RCREG+0, 0 
-	MOVWF       _second_input+0 
+	MOVWF       _uart_input+0 
 ;DZ.c,50 :: 		}
 L_interrupt0:
 ;DZ.c,51 :: 		}
 L_end_interrupt:
-L__interrupt55:
+L__interrupt60:
 	RETFIE      1
 ; end of _interrupt
 
 _timer_init:
 
 ;DZ.c,53 :: 		void timer_init(){
-;DZ.c,54 :: 		T0CON = 0b00000000;
+;DZ.c,54 :: 		T0CON = 0x00;
 	CLRF        T0CON+0 
 ;DZ.c,55 :: 		}
 L_end_timer_init:
@@ -31,19 +31,19 @@ L_end_timer_init:
 _delay_40us:
 
 ;DZ.c,57 :: 		void delay_40us() {
-;DZ.c,58 :: 		T1CON.TMR1ON = 0;      // выключить таймер
+;DZ.c,58 :: 		T1CON.TMR1ON = 0;
 	BCF         T1CON+0, 0 
 ;DZ.c,59 :: 		TMR1H = 0xFF;
 	MOVLW       255
 	MOVWF       TMR1H+0 
-;DZ.c,60 :: 		TMR1L = 0xD8;          // preload = 65536 - 25 = 65511 > 0xFFD8 (25 тиков ? 0.4 мкс ? 40 мкс)
-	MOVLW       216
+;DZ.c,60 :: 		TMR1L = 0x9C;
+	MOVLW       156
 	MOVWF       TMR1L+0 
-;DZ.c,61 :: 		PIR1.TMR1IF = 0;       // сбросить флаг переполнения
+;DZ.c,61 :: 		PIR1.TMR1IF = 0;
 	BCF         PIR1+0, 0 
-;DZ.c,62 :: 		T1CON.TMR1ON = 1;      // запустить таймер
+;DZ.c,62 :: 		T1CON.TMR1ON = 1;
 	BSF         T1CON+0, 0 
-;DZ.c,64 :: 		while (!PIR1.TMR1IF);  // ждать пока таймер переполнится
+;DZ.c,64 :: 		while (!PIR1.TMR1IF);
 L_delay_40us1:
 	BTFSC       PIR1+0, 0 
 	GOTO        L_delay_40us2
@@ -64,28 +64,28 @@ L_delay_ms_manual3:
 	MOVF        FARG_delay_ms_manual_ms+1, 0 
 	SUBWF       delay_ms_manual_i_L0+1, 0 
 	BTFSS       STATUS+0, 2 
-	GOTO        L__delay_ms_manual59
+	GOTO        L__delay_ms_manual64
 	MOVF        FARG_delay_ms_manual_ms+0, 0 
 	SUBWF       delay_ms_manual_i_L0+0, 0 
-L__delay_ms_manual59:
+L__delay_ms_manual64:
 	BTFSC       STATUS+0, 0 
 	GOTO        L_delay_ms_manual4
-;DZ.c,70 :: 		for (j = 0; j < 25; j++) {  // 25 ? 40 мкс = 1 мс
+;DZ.c,70 :: 		for (j = 0; j < 25; j++) {  // 25 ? 40 ??? = 1 ??
 	CLRF        delay_ms_manual_j_L0+0 
 	CLRF        delay_ms_manual_j_L0+1 
 L_delay_ms_manual6:
 	MOVLW       0
 	SUBWF       delay_ms_manual_j_L0+1, 0 
 	BTFSS       STATUS+0, 2 
-	GOTO        L__delay_ms_manual60
+	GOTO        L__delay_ms_manual65
 	MOVLW       25
 	SUBWF       delay_ms_manual_j_L0+0, 0 
-L__delay_ms_manual60:
+L__delay_ms_manual65:
 	BTFSC       STATUS+0, 0 
 	GOTO        L_delay_ms_manual7
 ;DZ.c,71 :: 		delay_40us();
 	CALL        _delay_40us+0, 0
-;DZ.c,70 :: 		for (j = 0; j < 25; j++) {  // 25 ? 40 мкс = 1 мс
+;DZ.c,70 :: 		for (j = 0; j < 25; j++) {  // 25 ? 40 ??? = 1 ??
 	INFSNZ      delay_ms_manual_j_L0+0, 1 
 	INCF        delay_ms_manual_j_L0+1, 1 
 ;DZ.c,72 :: 		}
@@ -120,10 +120,10 @@ L_to_binary9:
 	MOVLW       128
 	SUBWF       R0, 0 
 	BTFSS       STATUS+0, 2 
-	GOTO        L__to_binary62
+	GOTO        L__to_binary67
 	MOVLW       0
 	SUBWF       to_binary_i_L0+0, 0 
-L__to_binary62:
+L__to_binary67:
 	BTFSS       STATUS+0, 0 
 	GOTO        L_to_binary10
 ;DZ.c,79 :: 		buffer[7 - i] = (val & (1 << i)) ? '1' : '0';
@@ -147,14 +147,14 @@ L__to_binary62:
 	MOVLW       0
 	MOVWF       R1 
 	MOVF        R2, 0 
-L__to_binary63:
-	BZ          L__to_binary64
+L__to_binary68:
+	BZ          L__to_binary69
 	RLCF        R0, 1 
 	BCF         R0, 0 
 	RLCF        R1, 1 
 	ADDLW       255
-	GOTO        L__to_binary63
-L__to_binary64:
+	GOTO        L__to_binary68
+L__to_binary69:
 	MOVF        FARG_to_binary_val+0, 0 
 	ANDWF       R0, 1 
 	MOVLW       0
@@ -219,12 +219,12 @@ _lcd_cmd_4:
 	ANDWF       FARG_lcd_cmd_4_cmd+0, 0 
 	MOVWF       R0 
 	BTFSC       R0, 0 
-	GOTO        L__lcd_cmd_467
+	GOTO        L__lcd_cmd_472
 	BCF         LATD4_bit+0, BitPos(LATD4_bit+0) 
-	GOTO        L__lcd_cmd_468
-L__lcd_cmd_467:
+	GOTO        L__lcd_cmd_473
+L__lcd_cmd_472:
 	BSF         LATD4_bit+0, BitPos(LATD4_bit+0) 
-L__lcd_cmd_468:
+L__lcd_cmd_473:
 ;DZ.c,94 :: 		LCD_D5 = (cmd >> 1) & 1;
 	MOVF        FARG_lcd_cmd_4_cmd+0, 0 
 	MOVWF       R0 
@@ -233,12 +233,12 @@ L__lcd_cmd_468:
 	MOVLW       1
 	ANDWF       R0, 1 
 	BTFSC       R0, 0 
-	GOTO        L__lcd_cmd_469
+	GOTO        L__lcd_cmd_474
 	BCF         LATD5_bit+0, BitPos(LATD5_bit+0) 
-	GOTO        L__lcd_cmd_470
-L__lcd_cmd_469:
+	GOTO        L__lcd_cmd_475
+L__lcd_cmd_474:
 	BSF         LATD5_bit+0, BitPos(LATD5_bit+0) 
-L__lcd_cmd_470:
+L__lcd_cmd_475:
 ;DZ.c,95 :: 		LCD_D6 = (cmd >> 2) & 1;
 	MOVF        FARG_lcd_cmd_4_cmd+0, 0 
 	MOVWF       R0 
@@ -249,12 +249,12 @@ L__lcd_cmd_470:
 	MOVLW       1
 	ANDWF       R0, 1 
 	BTFSC       R0, 0 
-	GOTO        L__lcd_cmd_471
+	GOTO        L__lcd_cmd_476
 	BCF         LATD6_bit+0, BitPos(LATD6_bit+0) 
-	GOTO        L__lcd_cmd_472
-L__lcd_cmd_471:
+	GOTO        L__lcd_cmd_477
+L__lcd_cmd_476:
 	BSF         LATD6_bit+0, BitPos(LATD6_bit+0) 
-L__lcd_cmd_472:
+L__lcd_cmd_477:
 ;DZ.c,96 :: 		LCD_D7 = (cmd >> 3) & 1;
 	MOVF        FARG_lcd_cmd_4_cmd+0, 0 
 	MOVWF       R0 
@@ -267,12 +267,12 @@ L__lcd_cmd_472:
 	MOVLW       1
 	ANDWF       R0, 1 
 	BTFSC       R0, 0 
-	GOTO        L__lcd_cmd_473
+	GOTO        L__lcd_cmd_478
 	BCF         LATD7_bit+0, BitPos(LATD7_bit+0) 
-	GOTO        L__lcd_cmd_474
-L__lcd_cmd_473:
+	GOTO        L__lcd_cmd_479
+L__lcd_cmd_478:
 	BSF         LATD7_bit+0, BitPos(LATD7_bit+0) 
-L__lcd_cmd_474:
+L__lcd_cmd_479:
 ;DZ.c,97 :: 		}
 L_end_lcd_cmd_4:
 	RETURN      0
@@ -650,75 +650,83 @@ _main:
 ;DZ.c,243 :: 		void main() {
 ;DZ.c,244 :: 		unsigned char count = 0;
 	CLRF        main_count_L0+0 
+	CLRF        main_second_input_L0+0 
 	CLRF        main_i_L0+0 
 	MOVLW       1
 	MOVWF       main_j_L0+0 
-	CLRF        main_k_L0+0 
 	CLRF        main_input_value_L0+0 
 	CLRF        main_keyboard_result_L0+0 
-;DZ.c,253 :: 		ADCON1 = 0x0F;
+;DZ.c,254 :: 		ADCON1 = 0x0F;
 	MOVLW       15
 	MOVWF       ADCON1+0 
-;DZ.c,255 :: 		LCD_RS_Direction =0;
+;DZ.c,256 :: 		LCD_RS_Direction =0;
 	BCF         TRISB2_bit+0, BitPos(TRISB2_bit+0) 
-;DZ.c,256 :: 		LCD_EN_Direction =0;
+;DZ.c,257 :: 		LCD_EN_Direction =0;
 	BCF         TRISB5_bit+0, BitPos(TRISB5_bit+0) 
-;DZ.c,257 :: 		LCD_D4_Direction =0;
+;DZ.c,258 :: 		LCD_D4_Direction =0;
 	BCF         TRISD4_bit+0, BitPos(TRISD4_bit+0) 
-;DZ.c,258 :: 		LCD_D5_Direction =0;
+;DZ.c,259 :: 		LCD_D5_Direction =0;
 	BCF         TRISD5_bit+0, BitPos(TRISD5_bit+0) 
-;DZ.c,259 :: 		LCD_D6_Direction =0;
+;DZ.c,260 :: 		LCD_D6_Direction =0;
 	BCF         TRISD6_bit+0, BitPos(TRISD6_bit+0) 
-;DZ.c,260 :: 		LCD_D7_Direction =0;
+;DZ.c,261 :: 		LCD_D7_Direction =0;
 	BCF         TRISD7_bit+0, BitPos(TRISD7_bit+0) 
-;DZ.c,262 :: 		COL_0_Direction =0;
+;DZ.c,263 :: 		COL_0_Direction =0;
 	BCF         TRISA0_bit+0, BitPos(TRISA0_bit+0) 
-;DZ.c,263 :: 		COL_1_Direction =0;
+;DZ.c,264 :: 		COL_1_Direction =0;
 	BCF         TRISA1_bit+0, BitPos(TRISA1_bit+0) 
-;DZ.c,264 :: 		COL_2_Direction =0;
+;DZ.c,265 :: 		COL_2_Direction =0;
 	BCF         TRISA2_bit+0, BitPos(TRISA2_bit+0) 
-;DZ.c,265 :: 		COL_3_Direction =0;
+;DZ.c,266 :: 		COL_3_Direction =0;
 	BCF         TRISA3_bit+0, BitPos(TRISA3_bit+0) 
-;DZ.c,267 :: 		ROW_0_Direction =1;
+;DZ.c,268 :: 		ROW_0_Direction =1;
 	BSF         TRISA4_bit+0, BitPos(TRISA4_bit+0) 
-;DZ.c,268 :: 		ROW_1_Direction =1;
+;DZ.c,269 :: 		ROW_1_Direction =1;
 	BSF         TRISA5_bit+0, BitPos(TRISA5_bit+0) 
-;DZ.c,269 :: 		ROW_2_Direction =1;
+;DZ.c,270 :: 		ROW_2_Direction =1;
 	BSF         TRISA6_bit+0, BitPos(TRISA6_bit+0) 
-;DZ.c,270 :: 		ROW_3_Direction =1;
+;DZ.c,271 :: 		ROW_3_Direction =1;
 	BSF         TRISA7_bit+0, BitPos(TRISA7_bit+0) 
-;DZ.c,272 :: 		TRISD.B0 = 0;
+;DZ.c,273 :: 		TRISD.B0 = 0;
 	BCF         TRISD+0, 0 
-;DZ.c,274 :: 		timer_init();
+;DZ.c,275 :: 		timer_init();
 	CALL        _timer_init+0, 0
-;DZ.c,276 :: 		uart_init();
+;DZ.c,277 :: 		uart_init();
 	CALL        _uart_init+0, 0
-;DZ.c,278 :: 		lcd_init_all();
+;DZ.c,279 :: 		lcd_init_all();
 	CALL        _lcd_init_all+0, 0
-;DZ.c,280 :: 		delay_ms_manual(10);
+;DZ.c,281 :: 		delay_ms_manual(10);
 	MOVLW       10
 	MOVWF       FARG_delay_ms_manual_ms+0 
 	MOVLW       0
 	MOVWF       FARG_delay_ms_manual_ms+1 
 	CALL        _delay_ms_manual+0, 0
-;DZ.c,282 :: 		while(1){
+;DZ.c,283 :: 		while(1){
 L_main25:
-;DZ.c,283 :: 		i = 0;
+;DZ.c,284 :: 		delay_ms_manual(1000);
+	MOVLW       232
+	MOVWF       FARG_delay_ms_manual_ms+0 
+	MOVLW       3
+	MOVWF       FARG_delay_ms_manual_ms+1 
+	CALL        _delay_ms_manual+0, 0
+;DZ.c,285 :: 		i = 0;
 	CLRF        main_i_L0+0 
-;DZ.c,284 :: 		j = 0;
+;DZ.c,286 :: 		j = 0;
 	CLRF        main_j_L0+0 
-;DZ.c,286 :: 		second_input = 0;
-	CLRF        _second_input+0 
-;DZ.c,287 :: 		input_value = 0;
+;DZ.c,288 :: 		second_input = 0;
+	CLRF        main_second_input_L0+0 
+;DZ.c,289 :: 		uart_input = 0;
+	CLRF        _uart_input+0 
+;DZ.c,290 :: 		input_value = 0;
 	CLRF        main_input_value_L0+0 
-;DZ.c,288 :: 		keyboard_result = 0;
+;DZ.c,291 :: 		keyboard_result = 0;
 	CLRF        main_keyboard_result_L0+0 
-;DZ.c,289 :: 		uart_ready = 0;
+;DZ.c,292 :: 		uart_ready = 0;
 	CLRF        _uart_ready+0 
-;DZ.c,291 :: 		j = 1;
+;DZ.c,294 :: 		j = 1;
 	MOVLW       1
 	MOVWF       main_j_L0+0 
-;DZ.c,292 :: 		lcd_char_my(1,j,'S');
+;DZ.c,295 :: 		lcd_char_my(1,j,'S');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVLW       1
@@ -726,9 +734,9 @@ L_main25:
 	MOVLW       83
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,293 :: 		j++;
+;DZ.c,296 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,294 :: 		lcd_char_my(1,j,'E');
+;DZ.c,297 :: 		lcd_char_my(1,j,'E');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -736,9 +744,9 @@ L_main25:
 	MOVLW       69
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,295 :: 		j++;
+;DZ.c,298 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,296 :: 		lcd_char_my(1,j,'T');
+;DZ.c,299 :: 		lcd_char_my(1,j,'T');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -746,9 +754,9 @@ L_main25:
 	MOVLW       84
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,297 :: 		j++;
+;DZ.c,300 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,298 :: 		lcd_char_my(1,j,':');
+;DZ.c,301 :: 		lcd_char_my(1,j,':');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -756,66 +764,56 @@ L_main25:
 	MOVLW       58
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,299 :: 		j++;
+;DZ.c,302 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,300 :: 		j++;
+;DZ.c,303 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,302 :: 		j=1;
+;DZ.c,305 :: 		j=1;
 	MOVLW       1
 	MOVWF       main_j_L0+0 
-;DZ.c,304 :: 		delay_ms_manual(10);
+;DZ.c,307 :: 		delay_ms_manual(10);
 	MOVLW       10
 	MOVWF       FARG_delay_ms_manual_ms+0 
 	MOVLW       0
 	MOVWF       FARG_delay_ms_manual_ms+1 
 	CALL        _delay_ms_manual+0, 0
-;DZ.c,306 :: 		while (keyboard_result !=0x12) {
+;DZ.c,309 :: 		while (keyboard_result !=0x12) {
 L_main27:
 	MOVF        main_keyboard_result_L0+0, 0 
 	XORLW       18
 	BTFSC       STATUS+0, 2 
 	GOTO        L_main28
-;DZ.c,307 :: 		lcd_char_my(1, 6, k);
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVLW       6
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVF        main_k_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-;DZ.c,308 :: 		k++;
-	INCF        main_k_L0+0, 1 
-;DZ.c,310 :: 		keyboard_result = check_keyboard();
+;DZ.c,311 :: 		keyboard_result = check_keyboard();
 	CALL        _check_keyboard+0, 0
 	MOVF        R0, 0 
 	MOVWF       main_keyboard_result_L0+0 
-;DZ.c,312 :: 		if (keyboard_result == 0x10) {
+;DZ.c,313 :: 		if (keyboard_result == 0x10) {
 	MOVF        R0, 0 
 	XORLW       16
 	BTFSS       STATUS+0, 2 
 	GOTO        L_main29
-;DZ.c,313 :: 		input_value <<= 1;
+;DZ.c,314 :: 		input_value <<= 1;
 	RLCF        main_input_value_L0+0, 1 
 	BCF         main_input_value_L0+0, 0 
-;DZ.c,314 :: 		}
+;DZ.c,315 :: 		}
 L_main29:
-;DZ.c,315 :: 		if (keyboard_result == 0x11) {
+;DZ.c,316 :: 		if (keyboard_result == 0x11) {
 	MOVF        main_keyboard_result_L0+0, 0 
 	XORLW       17
 	BTFSS       STATUS+0, 2 
 	GOTO        L_main30
-;DZ.c,316 :: 		input_value = (input_value << 1) | 1;
+;DZ.c,317 :: 		input_value = (input_value << 1) | 1;
 	RLCF        main_input_value_L0+0, 1 
 	BCF         main_input_value_L0+0, 0 
 	BSF         main_input_value_L0+0, 0 
-;DZ.c,317 :: 		}
+;DZ.c,318 :: 		}
 L_main30:
-;DZ.c,318 :: 		if (keyboard_result == 0x12) {
+;DZ.c,319 :: 		if (keyboard_result == 0x12) {
 	MOVF        main_keyboard_result_L0+0, 0 
 	XORLW       18
 	BTFSS       STATUS+0, 2 
 	GOTO        L_main31
-;DZ.c,319 :: 		lcd_char_my(1, j, 'S');
+;DZ.c,320 :: 		lcd_char_my(1, j, 'S');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -823,9 +821,9 @@ L_main30:
 	MOVLW       83
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,320 :: 		j++;
+;DZ.c,321 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,321 :: 		lcd_char_my(1, j, 'T');
+;DZ.c,322 :: 		lcd_char_my(1, j, 'T');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -833,9 +831,9 @@ L_main30:
 	MOVLW       84
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,322 :: 		j++;
+;DZ.c,323 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,323 :: 		lcd_char_my(1, j, 'A');
+;DZ.c,324 :: 		lcd_char_my(1, j, 'A');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -843,9 +841,9 @@ L_main30:
 	MOVLW       65
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,324 :: 		j++;
+;DZ.c,325 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,325 :: 		lcd_char_my(1, j, 'R');
+;DZ.c,326 :: 		lcd_char_my(1, j, 'R');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -853,9 +851,9 @@ L_main30:
 	MOVLW       82
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,326 :: 		j++;
+;DZ.c,327 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,327 :: 		lcd_char_my(1, j, 'T');
+;DZ.c,328 :: 		lcd_char_my(1, j, 'T');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -863,9 +861,9 @@ L_main30:
 	MOVLW       84
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,328 :: 		j++;
+;DZ.c,329 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,329 :: 		lcd_char_my(1, j, 'I');
+;DZ.c,330 :: 		lcd_char_my(1, j, 'I');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -873,9 +871,9 @@ L_main30:
 	MOVLW       73
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,330 :: 		j++;
+;DZ.c,331 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,331 :: 		lcd_char_my(1, j, 'N');
+;DZ.c,332 :: 		lcd_char_my(1, j, 'N');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -883,9 +881,9 @@ L_main30:
 	MOVLW       78
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,332 :: 		j++;
+;DZ.c,333 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,333 :: 		lcd_char_my(1, j, 'G');
+;DZ.c,334 :: 		lcd_char_my(1, j, 'G');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -893,23 +891,23 @@ L_main30:
 	MOVLW       71
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,334 :: 		delay_ms_manual(2000);
+;DZ.c,335 :: 		delay_ms_manual(2000);
 	MOVLW       208
 	MOVWF       FARG_delay_ms_manual_ms+0 
 	MOVLW       7
 	MOVWF       FARG_delay_ms_manual_ms+1 
 	CALL        _delay_ms_manual+0, 0
-;DZ.c,335 :: 		}
+;DZ.c,336 :: 		}
 L_main31:
-;DZ.c,337 :: 		if(keyboard_result == 0x13){
+;DZ.c,338 :: 		if(keyboard_result == 0x13){
 	MOVF        main_keyboard_result_L0+0, 0 
 	XORLW       19
 	BTFSS       STATUS+0, 2 
 	GOTO        L_main32
-;DZ.c,338 :: 		j = 1;
+;DZ.c,339 :: 		j = 1;
 	MOVLW       1
 	MOVWF       main_j_L0+0 
-;DZ.c,339 :: 		lcd_char_my(1,j,'B'); j++;
+;DZ.c,340 :: 		lcd_char_my(1,j,'B'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVLW       1
@@ -918,7 +916,7 @@ L_main31:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,340 :: 		lcd_char_my(1,j,'R'); j++;
+;DZ.c,341 :: 		lcd_char_my(1,j,'R'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -927,7 +925,7 @@ L_main31:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,341 :: 		lcd_char_my(1,j,'E'); j++;
+;DZ.c,342 :: 		lcd_char_my(1,j,'E'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -936,7 +934,7 @@ L_main31:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,342 :: 		lcd_char_my(1,j,'A'); j++;
+;DZ.c,343 :: 		lcd_char_my(1,j,'A'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -945,7 +943,7 @@ L_main31:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,343 :: 		lcd_char_my(1,j,'K'); j++;
+;DZ.c,344 :: 		lcd_char_my(1,j,'K'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -954,7 +952,7 @@ L_main31:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,344 :: 		lcd_char_my(1,j,'I'); j++;
+;DZ.c,345 :: 		lcd_char_my(1,j,'I'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -963,7 +961,7 @@ L_main31:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,345 :: 		lcd_char_my(1,j,'N'); j++;
+;DZ.c,346 :: 		lcd_char_my(1,j,'N'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -972,21 +970,12 @@ L_main31:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,346 :: 		lcd_char_my(1,j,'G'); j++;
+;DZ.c,347 :: 		lcd_char_my(1,j,'G'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
 	MOVWF       FARG_lcd_char_my_column+0 
 	MOVLW       71
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,347 :: 		lcd_char_my(1,j,' '); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       32
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
@@ -1035,19 +1024,28 @@ L_main31:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,353 :: 		delay_ms_manual(2000);
+;DZ.c,353 :: 		lcd_char_my(1,j,' '); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       32
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,354 :: 		delay_ms_manual(2000);
 	MOVLW       208
 	MOVWF       FARG_delay_ms_manual_ms+0 
 	MOVLW       7
 	MOVWF       FARG_delay_ms_manual_ms+1 
 	CALL        _delay_ms_manual+0, 0
-;DZ.c,354 :: 		input_value = 0;
+;DZ.c,355 :: 		input_value = 0;
 	CLRF        main_input_value_L0+0 
-;DZ.c,355 :: 		break;
+;DZ.c,356 :: 		break;
 	GOTO        L_main28
-;DZ.c,356 :: 		}
+;DZ.c,357 :: 		}
 L_main32:
-;DZ.c,358 :: 		to_binary(input_value, bin_str);
+;DZ.c,359 :: 		to_binary(input_value, bin_str);
 	MOVF        main_input_value_L0+0, 0 
 	MOVWF       FARG_to_binary_val+0 
 	MOVLW       main_bin_str_L0+0
@@ -1055,14 +1053,14 @@ L_main32:
 	MOVLW       hi_addr(main_bin_str_L0+0)
 	MOVWF       FARG_to_binary_buffer+1 
 	CALL        _to_binary+0, 0
-;DZ.c,359 :: 		for (i = 0; i < 8; i++) {
+;DZ.c,360 :: 		for (i = 0; i < 8; i++) {
 	CLRF        main_i_L0+0 
 L_main33:
 	MOVLW       8
 	SUBWF       main_i_L0+0, 0 
 	BTFSC       STATUS+0, 0 
 	GOTO        L_main34
-;DZ.c,360 :: 		lcd_char_my(2, i + 1, bin_str[i]);
+;DZ.c,361 :: 		lcd_char_my(2, i + 1, bin_str[i]);
 	MOVLW       2
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_i_L0+0, 0 
@@ -1079,31 +1077,31 @@ L_main33:
 	MOVF        POSTINC0+0, 0 
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,359 :: 		for (i = 0; i < 8; i++) {
+;DZ.c,360 :: 		for (i = 0; i < 8; i++) {
 	INCF        main_i_L0+0, 1 
-;DZ.c,361 :: 		}
+;DZ.c,362 :: 		}
 	GOTO        L_main33
 L_main34:
-;DZ.c,362 :: 		}
+;DZ.c,363 :: 		}
 	GOTO        L_main27
 L_main28:
-;DZ.c,364 :: 		count = input_value;
+;DZ.c,365 :: 		count = input_value;
 	MOVF        main_input_value_L0+0, 0 
 	MOVWF       main_count_L0+0 
-;DZ.c,366 :: 		lcd_cmd_my(0x01);
+;DZ.c,367 :: 		lcd_cmd_my(0x01);
 	MOVLW       1
 	MOVWF       FARG_lcd_cmd_my_cmd+0 
 	CALL        _lcd_cmd_my+0, 0
-;DZ.c,368 :: 		delay_ms_manual(100);
+;DZ.c,369 :: 		delay_ms_manual(100);
 	MOVLW       100
 	MOVWF       FARG_delay_ms_manual_ms+0 
 	MOVLW       0
 	MOVWF       FARG_delay_ms_manual_ms+1 
 	CALL        _delay_ms_manual+0, 0
-;DZ.c,370 :: 		j = 1;
+;DZ.c,371 :: 		j = 1;
 	MOVLW       1
 	MOVWF       main_j_L0+0 
-;DZ.c,371 :: 		lcd_char_my(1,j,'S'); j++;
+;DZ.c,372 :: 		lcd_char_my(1,j,'S'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVLW       1
@@ -1112,7 +1110,7 @@ L_main28:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,372 :: 		lcd_char_my(1,j,'E'); j++;
+;DZ.c,373 :: 		lcd_char_my(1,j,'E'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1121,7 +1119,7 @@ L_main28:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,373 :: 		lcd_char_my(1,j,'C'); j++;
+;DZ.c,374 :: 		lcd_char_my(1,j,'C'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1130,7 +1128,7 @@ L_main28:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,374 :: 		lcd_char_my(1,j,'O'); j++;
+;DZ.c,375 :: 		lcd_char_my(1,j,'O'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1139,7 +1137,7 @@ L_main28:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,375 :: 		lcd_char_my(1,j,'N'); j++;
+;DZ.c,376 :: 		lcd_char_my(1,j,'N'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1148,7 +1146,7 @@ L_main28:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,376 :: 		lcd_char_my(1,j,'D'); j++;
+;DZ.c,377 :: 		lcd_char_my(1,j,'D'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1157,7 +1155,7 @@ L_main28:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,377 :: 		lcd_char_my(1,j,':');
+;DZ.c,378 :: 		lcd_char_my(1,j,':');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1165,34 +1163,24 @@ L_main28:
 	MOVLW       58
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,379 :: 		while (1) {
+;DZ.c,380 :: 		while (1) {
 L_main36:
-;DZ.c,380 :: 		lcd_char_my(2, 10, k);
-	MOVLW       2
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVLW       10
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVF        main_k_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-;DZ.c,381 :: 		k++;
-	INCF        main_k_L0+0, 1 
-;DZ.c,383 :: 		keyboard_result = check_keyboard();
+;DZ.c,381 :: 		keyboard_result = check_keyboard();
 	CALL        _check_keyboard+0, 0
 	MOVF        R0, 0 
 	MOVWF       main_keyboard_result_L0+0 
-;DZ.c,384 :: 		if(keyboard_result == 0x13){
+;DZ.c,382 :: 		if(keyboard_result == 0x13){
 	MOVF        R0, 0 
 	XORLW       19
 	BTFSS       STATUS+0, 2 
 	GOTO        L_main38
-;DZ.c,385 :: 		second_input = 255;
+;DZ.c,383 :: 		second_input = 255;
 	MOVLW       255
-	MOVWF       _second_input+0 
-;DZ.c,386 :: 		j = 1;
+	MOVWF       main_second_input_L0+0 
+;DZ.c,384 :: 		j = 1;
 	MOVLW       1
 	MOVWF       main_j_L0+0 
-;DZ.c,387 :: 		lcd_char_my(1,j,'B'); j++;
+;DZ.c,385 :: 		lcd_char_my(1,j,'B'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVLW       1
@@ -1201,7 +1189,7 @@ L_main36:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,388 :: 		lcd_char_my(1,j,'R'); j++;
+;DZ.c,386 :: 		lcd_char_my(1,j,'R'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1210,7 +1198,7 @@ L_main36:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,389 :: 		lcd_char_my(1,j,'E'); j++;
+;DZ.c,387 :: 		lcd_char_my(1,j,'E'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1219,7 +1207,7 @@ L_main36:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,390 :: 		lcd_char_my(1,j,'A'); j++;
+;DZ.c,388 :: 		lcd_char_my(1,j,'A'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1228,7 +1216,7 @@ L_main36:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,391 :: 		lcd_char_my(1,j,'K'); j++;
+;DZ.c,389 :: 		lcd_char_my(1,j,'K'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1237,7 +1225,7 @@ L_main36:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,392 :: 		lcd_char_my(1,j,'I'); j++;
+;DZ.c,390 :: 		lcd_char_my(1,j,'I'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1246,7 +1234,7 @@ L_main36:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,393 :: 		lcd_char_my(1,j,'N'); j++;
+;DZ.c,391 :: 		lcd_char_my(1,j,'N'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1255,12 +1243,30 @@ L_main36:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,394 :: 		lcd_char_my(1,j,'G'); j++;
+;DZ.c,392 :: 		lcd_char_my(1,j,'G'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
 	MOVWF       FARG_lcd_char_my_column+0 
 	MOVLW       71
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,393 :: 		lcd_char_my(1,j,' '); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       32
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,394 :: 		lcd_char_my(1,j,' '); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       32
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
@@ -1300,55 +1306,21 @@ L_main36:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,399 :: 		lcd_char_my(1,j,' '); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       32
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,400 :: 		lcd_char_my(1,j,' '); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       32
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,401 :: 		delay_ms_manual(2000);
-	MOVLW       208
-	MOVWF       FARG_delay_ms_manual_ms+0 
-	MOVLW       7
-	MOVWF       FARG_delay_ms_manual_ms+1 
-	CALL        _delay_ms_manual+0, 0
-;DZ.c,402 :: 		break;
-	GOTO        L_main37
-;DZ.c,403 :: 		}
-L_main38:
-;DZ.c,405 :: 		if (uart_ready >0) {
-	MOVF        _uart_ready+0, 0 
-	SUBLW       0
-	BTFSC       STATUS+0, 0 
-	GOTO        L_main39
-;DZ.c,407 :: 		to_binary(second_input & 0xFF, bin_str);
-	MOVLW       255
-	ANDWF       _second_input+0, 0 
+;DZ.c,400 :: 		to_binary(second_input, bin_str);
+	MOVF        main_second_input_L0+0, 0 
 	MOVWF       FARG_to_binary_val+0 
 	MOVLW       main_bin_str_L0+0
 	MOVWF       FARG_to_binary_buffer+0 
 	MOVLW       hi_addr(main_bin_str_L0+0)
 	MOVWF       FARG_to_binary_buffer+1 
 	CALL        _to_binary+0, 0
-;DZ.c,408 :: 		for (i = 0; i < 8; i++) lcd_char_my(2, i + 1, bin_str[i]);
+;DZ.c,401 :: 		for (i = 0; i < 8; i++) lcd_char_my(2, i + 1, bin_str[i]);
 	CLRF        main_i_L0+0 
-L_main40:
+L_main39:
 	MOVLW       8
 	SUBWF       main_i_L0+0, 0 
 	BTFSC       STATUS+0, 0 
-	GOTO        L_main41
+	GOTO        L_main40
 	MOVLW       2
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_i_L0+0, 0 
@@ -1366,12 +1338,64 @@ L_main40:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_i_L0+0, 1 
-	GOTO        L_main40
-L_main41:
-;DZ.c,410 :: 		j = 1;
+	GOTO        L_main39
+L_main40:
+;DZ.c,403 :: 		delay_ms_manual(2000);
+	MOVLW       208
+	MOVWF       FARG_delay_ms_manual_ms+0 
+	MOVLW       7
+	MOVWF       FARG_delay_ms_manual_ms+1 
+	CALL        _delay_ms_manual+0, 0
+;DZ.c,404 :: 		break;
+	GOTO        L_main37
+;DZ.c,405 :: 		}
+L_main38:
+;DZ.c,407 :: 		if (uart_ready >0) {
+	MOVF        _uart_ready+0, 0 
+	SUBLW       0
+	BTFSC       STATUS+0, 0 
+	GOTO        L_main42
+;DZ.c,408 :: 		second_input = uart_input;
+	MOVF        _uart_input+0, 0 
+	MOVWF       main_second_input_L0+0 
+;DZ.c,409 :: 		to_binary(second_input, bin_str);
+	MOVF        _uart_input+0, 0 
+	MOVWF       FARG_to_binary_val+0 
+	MOVLW       main_bin_str_L0+0
+	MOVWF       FARG_to_binary_buffer+0 
+	MOVLW       hi_addr(main_bin_str_L0+0)
+	MOVWF       FARG_to_binary_buffer+1 
+	CALL        _to_binary+0, 0
+;DZ.c,410 :: 		for (i = 0; i < 8; i++) lcd_char_my(2, i + 1, bin_str[i]);
+	CLRF        main_i_L0+0 
+L_main43:
+	MOVLW       8
+	SUBWF       main_i_L0+0, 0 
+	BTFSC       STATUS+0, 0 
+	GOTO        L_main44
+	MOVLW       2
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_i_L0+0, 0 
+	ADDLW       1
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       main_bin_str_L0+0
+	MOVWF       FSR0L+0 
+	MOVLW       hi_addr(main_bin_str_L0+0)
+	MOVWF       FSR0L+1 
+	MOVF        main_i_L0+0, 0 
+	ADDWF       FSR0L+0, 1 
+	BTFSC       STATUS+0, 0 
+	INCF        FSR0L+1, 1 
+	MOVF        POSTINC0+0, 0 
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_i_L0+0, 1 
+	GOTO        L_main43
+L_main44:
+;DZ.c,412 :: 		j = 1;
 	MOVLW       1
 	MOVWF       main_j_L0+0 
-;DZ.c,411 :: 		lcd_char_my(1, j, 'S');
+;DZ.c,413 :: 		lcd_char_my(1, j, 'S');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVLW       1
@@ -1379,9 +1403,9 @@ L_main41:
 	MOVLW       83
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,412 :: 		j++;
+;DZ.c,414 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,413 :: 		lcd_char_my(1, j, 'T');
+;DZ.c,415 :: 		lcd_char_my(1, j, 'T');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1389,9 +1413,9 @@ L_main41:
 	MOVLW       84
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,414 :: 		j++;
+;DZ.c,416 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,415 :: 		lcd_char_my(1, j, 'A');
+;DZ.c,417 :: 		lcd_char_my(1, j, 'A');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1399,9 +1423,9 @@ L_main41:
 	MOVLW       65
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,416 :: 		j++;
+;DZ.c,418 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,417 :: 		lcd_char_my(1, j, 'R');
+;DZ.c,419 :: 		lcd_char_my(1, j, 'R');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1409,9 +1433,9 @@ L_main41:
 	MOVLW       82
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,418 :: 		j++;
+;DZ.c,420 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,419 :: 		lcd_char_my(1, j, 'T');
+;DZ.c,421 :: 		lcd_char_my(1, j, 'T');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1419,9 +1443,9 @@ L_main41:
 	MOVLW       84
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,420 :: 		j++;
+;DZ.c,422 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,421 :: 		lcd_char_my(1, j, 'I');
+;DZ.c,423 :: 		lcd_char_my(1, j, 'I');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1429,9 +1453,9 @@ L_main41:
 	MOVLW       73
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,422 :: 		j++;
+;DZ.c,424 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,423 :: 		lcd_char_my(1, j, 'N');
+;DZ.c,425 :: 		lcd_char_my(1, j, 'N');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1439,9 +1463,9 @@ L_main41:
 	MOVLW       78
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,424 :: 		j++;
+;DZ.c,426 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,425 :: 		lcd_char_my(1, j, 'G');
+;DZ.c,427 :: 		lcd_char_my(1, j, 'G');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1449,9 +1473,9 @@ L_main41:
 	MOVLW       71
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,426 :: 		j++;
+;DZ.c,428 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,427 :: 		lcd_char_my(1, j, ' ');
+;DZ.c,429 :: 		lcd_char_my(1, j, ' ');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1459,33 +1483,126 @@ L_main41:
 	MOVLW       32
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,429 :: 		delay_ms_manual(2000);
+;DZ.c,431 :: 		delay_ms_manual(2000);
 	MOVLW       208
 	MOVWF       FARG_delay_ms_manual_ms+0 
 	MOVLW       7
 	MOVWF       FARG_delay_ms_manual_ms+1 
 	CALL        _delay_ms_manual+0, 0
-;DZ.c,430 :: 		break;
+;DZ.c,432 :: 		break;
 	GOTO        L_main37
-;DZ.c,431 :: 		}
-L_main39:
-;DZ.c,432 :: 		}
+;DZ.c,433 :: 		}
+L_main42:
+;DZ.c,434 :: 		}
 	GOTO        L_main36
 L_main37:
-;DZ.c,434 :: 		lcd_cmd_my(0x01);
+;DZ.c,436 :: 		lcd_cmd_my(0x01);
 	MOVLW       1
 	MOVWF       FARG_lcd_cmd_my_cmd+0 
 	CALL        _lcd_cmd_my+0, 0
-;DZ.c,435 :: 		delay_ms_manual(100);
+;DZ.c,437 :: 		delay_ms_manual(100);
 	MOVLW       100
 	MOVWF       FARG_delay_ms_manual_ms+0 
 	MOVLW       0
 	MOVWF       FARG_delay_ms_manual_ms+1 
 	CALL        _delay_ms_manual+0, 0
-;DZ.c,437 :: 		j = 1;
+;DZ.c,439 :: 		if(second_input==count){
+	MOVF        main_second_input_L0+0, 0 
+	XORWF       main_count_L0+0, 0 
+	BTFSS       STATUS+0, 2 
+	GOTO        L_main46
+;DZ.c,440 :: 		j = 1;
 	MOVLW       1
 	MOVWF       main_j_L0+0 
-;DZ.c,438 :: 		lcd_char_my(1, j, 'B');
+;DZ.c,441 :: 		lcd_char_my(2, j, 'X');
+	MOVLW       2
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       88
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+;DZ.c,442 :: 		j++;
+	INCF        main_j_L0+0, 1 
+;DZ.c,443 :: 		lcd_char_my(2, j, '=');
+	MOVLW       2
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       61
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+;DZ.c,444 :: 		j++;
+	INCF        main_j_L0+0, 1 
+;DZ.c,445 :: 		lcd_char_my(2, j, 'Y');
+	MOVLW       2
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       89
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+;DZ.c,446 :: 		j++;
+	INCF        main_j_L0+0, 1 
+;DZ.c,447 :: 		delay_ms_manual(5000);
+	MOVLW       136
+	MOVWF       FARG_delay_ms_manual_ms+0 
+	MOVLW       19
+	MOVWF       FARG_delay_ms_manual_ms+1 
+	CALL        _delay_ms_manual+0, 0
+;DZ.c,448 :: 		}else if(second_input<count){
+	GOTO        L_main47
+L_main46:
+	MOVF        main_count_L0+0, 0 
+	SUBWF       main_second_input_L0+0, 0 
+	BTFSC       STATUS+0, 0 
+	GOTO        L_main48
+;DZ.c,449 :: 		j = 1;
+	MOVLW       1
+	MOVWF       main_j_L0+0 
+;DZ.c,450 :: 		lcd_char_my(2, j, 'X');
+	MOVLW       2
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       88
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+;DZ.c,451 :: 		j++;
+	INCF        main_j_L0+0, 1 
+;DZ.c,452 :: 		lcd_char_my(2, j, '<');
+	MOVLW       2
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       60
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+;DZ.c,453 :: 		j++;
+	INCF        main_j_L0+0, 1 
+;DZ.c,454 :: 		lcd_char_my(2, j, 'Y');
+	MOVLW       2
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       89
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+;DZ.c,455 :: 		j++;
+	INCF        main_j_L0+0, 1 
+;DZ.c,456 :: 		delay_ms_manual(5000);
+	MOVLW       136
+	MOVWF       FARG_delay_ms_manual_ms+0 
+	MOVLW       19
+	MOVWF       FARG_delay_ms_manual_ms+1 
+	CALL        _delay_ms_manual+0, 0
+;DZ.c,457 :: 		}else{
+	GOTO        L_main49
+L_main48:
+;DZ.c,459 :: 		j = 1;
+	MOVLW       1
+	MOVWF       main_j_L0+0 
+;DZ.c,460 :: 		lcd_char_my(1, j, 'B');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVLW       1
@@ -1493,9 +1610,9 @@ L_main37:
 	MOVLW       66
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,439 :: 		j++;
+;DZ.c,461 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,440 :: 		lcd_char_my(1, j, 'I');
+;DZ.c,462 :: 		lcd_char_my(1, j, 'I');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1503,9 +1620,9 @@ L_main37:
 	MOVLW       73
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,441 :: 		j++;
+;DZ.c,463 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,442 :: 		lcd_char_my(1, j, 'N');
+;DZ.c,464 :: 		lcd_char_my(1, j, 'N');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1513,11 +1630,11 @@ L_main37:
 	MOVLW       78
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,443 :: 		j++;
+;DZ.c,465 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,444 :: 		j++;
+;DZ.c,466 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,445 :: 		lcd_char_my(1, j, 'C');
+;DZ.c,467 :: 		lcd_char_my(1, j, 'C');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1525,9 +1642,9 @@ L_main37:
 	MOVLW       67
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,446 :: 		j++;
+;DZ.c,468 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,447 :: 		lcd_char_my(1, j, 'O');
+;DZ.c,469 :: 		lcd_char_my(1, j, 'O');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1535,9 +1652,9 @@ L_main37:
 	MOVLW       79
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,448 :: 		j++;
+;DZ.c,470 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,449 :: 		lcd_char_my(1, j, 'U');
+;DZ.c,471 :: 		lcd_char_my(1, j, 'U');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1545,9 +1662,9 @@ L_main37:
 	MOVLW       85
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,450 :: 		j++;
+;DZ.c,472 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,451 :: 		lcd_char_my(1, j, 'N');
+;DZ.c,473 :: 		lcd_char_my(1, j, 'N');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1555,9 +1672,9 @@ L_main37:
 	MOVLW       78
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,452 :: 		j++;
+;DZ.c,474 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,453 :: 		lcd_char_my(1, j, 'T');
+;DZ.c,475 :: 		lcd_char_my(1, j, 'T');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1565,9 +1682,9 @@ L_main37:
 	MOVLW       84
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,454 :: 		j++;
+;DZ.c,476 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,455 :: 		lcd_char_my(1, j, 'E');
+;DZ.c,477 :: 		lcd_char_my(1, j, 'E');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1575,9 +1692,9 @@ L_main37:
 	MOVLW       69
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,456 :: 		j++;
+;DZ.c,478 :: 		j++;
 	INCF        main_j_L0+0, 1 
-;DZ.c,457 :: 		lcd_char_my(1, j, 'R');
+;DZ.c,479 :: 		lcd_char_my(1, j, 'R');
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1585,7 +1702,7 @@ L_main37:
 	MOVLW       82
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,459 :: 		to_binary(count, bin_str);
+;DZ.c,481 :: 		to_binary(count, bin_str);
 	MOVF        main_count_L0+0, 0 
 	MOVWF       FARG_to_binary_val+0 
 	MOVLW       main_bin_str_L0+0
@@ -1593,14 +1710,14 @@ L_main37:
 	MOVLW       hi_addr(main_bin_str_L0+0)
 	MOVWF       FARG_to_binary_buffer+1 
 	CALL        _to_binary+0, 0
-;DZ.c,461 :: 		for (i = 0; i < 8; i++) {
+;DZ.c,483 :: 		for (i = 0; i < 8; i++) {
 	CLRF        main_i_L0+0 
-L_main43:
+L_main50:
 	MOVLW       8
 	SUBWF       main_i_L0+0, 0 
 	BTFSC       STATUS+0, 0 
-	GOTO        L_main44
-;DZ.c,462 :: 		lcd_char_my(2, i + 2, bin_str[i]);
+	GOTO        L_main51
+;DZ.c,484 :: 		lcd_char_my(2, i + 2, bin_str[i]);
 	MOVLW       2
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVLW       2
@@ -1617,115 +1734,23 @@ L_main43:
 	MOVF        POSTINC0+0, 0 
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
-;DZ.c,461 :: 		for (i = 0; i < 8; i++) {
+;DZ.c,483 :: 		for (i = 0; i < 8; i++) {
 	INCF        main_i_L0+0, 1 
-;DZ.c,463 :: 		}
-	GOTO        L_main43
-L_main44:
-;DZ.c,464 :: 		delay_ms_manual(1000);
+;DZ.c,485 :: 		}
+	GOTO        L_main50
+L_main51:
+;DZ.c,486 :: 		delay_ms_manual(1000);
 	MOVLW       232
 	MOVWF       FARG_delay_ms_manual_ms+0 
 	MOVLW       3
 	MOVWF       FARG_delay_ms_manual_ms+1 
 	CALL        _delay_ms_manual+0, 0
-;DZ.c,466 :: 		if(second_input==count){
-	MOVF        _second_input+0, 0 
-	XORWF       main_count_L0+0, 0 
-	BTFSS       STATUS+0, 2 
-	GOTO        L_main46
-;DZ.c,467 :: 		j = 1;
-	MOVLW       1
-	MOVWF       main_j_L0+0 
-;DZ.c,468 :: 		lcd_char_my(2, j, 'X');
-	MOVLW       2
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       88
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-;DZ.c,469 :: 		j++;
-	INCF        main_j_L0+0, 1 
-;DZ.c,470 :: 		lcd_char_my(2, j, '=');
-	MOVLW       2
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       61
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-;DZ.c,471 :: 		j++;
-	INCF        main_j_L0+0, 1 
-;DZ.c,472 :: 		lcd_char_my(2, j, 'Y');
-	MOVLW       2
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       89
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-;DZ.c,473 :: 		j++;
-	INCF        main_j_L0+0, 1 
-;DZ.c,474 :: 		delay_ms_manual(1000);
-	MOVLW       232
-	MOVWF       FARG_delay_ms_manual_ms+0 
-	MOVLW       3
-	MOVWF       FARG_delay_ms_manual_ms+1 
-	CALL        _delay_ms_manual+0, 0
-;DZ.c,475 :: 		}
-L_main46:
-;DZ.c,477 :: 		if(second_input<count){
-	MOVF        main_count_L0+0, 0 
-	SUBWF       _second_input+0, 0 
-	BTFSC       STATUS+0, 0 
-	GOTO        L_main47
-;DZ.c,478 :: 		j = 1;
-	MOVLW       1
-	MOVWF       main_j_L0+0 
-;DZ.c,479 :: 		lcd_char_my(2, j, 'X');
-	MOVLW       2
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       88
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-;DZ.c,480 :: 		j++;
-	INCF        main_j_L0+0, 1 
-;DZ.c,481 :: 		lcd_char_my(2, j, '<');
-	MOVLW       2
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       60
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-;DZ.c,482 :: 		j++;
-	INCF        main_j_L0+0, 1 
-;DZ.c,483 :: 		lcd_char_my(2, j, 'Y');
-	MOVLW       2
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       89
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-;DZ.c,484 :: 		j++;
-	INCF        main_j_L0+0, 1 
-;DZ.c,485 :: 		delay_ms_manual(1000);
-	MOVLW       232
-	MOVWF       FARG_delay_ms_manual_ms+0 
-	MOVLW       3
-	MOVWF       FARG_delay_ms_manual_ms+1 
-	CALL        _delay_ms_manual+0, 0
-;DZ.c,486 :: 		}
-L_main47:
 ;DZ.c,488 :: 		while (count<second_input) {
-L_main48:
-	MOVF        _second_input+0, 0 
+L_main53:
+	MOVF        main_second_input_L0+0, 0 
 	SUBWF       main_count_L0+0, 0 
 	BTFSC       STATUS+0, 0 
-	GOTO        L_main49
+	GOTO        L_main54
 ;DZ.c,489 :: 		keyboard_result = check_keyboard();
 	CALL        _check_keyboard+0, 0
 	MOVF        R0, 0 
@@ -1734,7 +1759,7 @@ L_main48:
 	MOVF        R0, 0 
 	XORLW       19
 	BTFSS       STATUS+0, 2 
-	GOTO        L_main50
+	GOTO        L_main55
 ;DZ.c,491 :: 		j = 1;
 	MOVLW       1
 	MOVWF       main_j_L0+0 
@@ -1871,9 +1896,9 @@ L_main48:
 	MOVWF       FARG_delay_ms_manual_ms+1 
 	CALL        _delay_ms_manual+0, 0
 ;DZ.c,508 :: 		break;
-	GOTO        L_main49
+	GOTO        L_main54
 ;DZ.c,509 :: 		}
-L_main50:
+L_main55:
 ;DZ.c,510 :: 		count++;
 	INCF        main_count_L0+0, 1 
 ;DZ.c,512 :: 		to_binary(count, bin_str);
@@ -1886,11 +1911,11 @@ L_main50:
 	CALL        _to_binary+0, 0
 ;DZ.c,514 :: 		for (i = 0; i < 8; i++) {
 	CLRF        main_i_L0+0 
-L_main51:
+L_main56:
 	MOVLW       8
 	SUBWF       main_i_L0+0, 0 
 	BTFSC       STATUS+0, 0 
-	GOTO        L_main52
+	GOTO        L_main57
 ;DZ.c,515 :: 		lcd_char_my(2, i + 2, bin_str[i]);
 	MOVLW       2
 	MOVWF       FARG_lcd_char_my_row+0 
@@ -1911,8 +1936,8 @@ L_main51:
 ;DZ.c,514 :: 		for (i = 0; i < 8; i++) {
 	INCF        main_i_L0+0, 1 
 ;DZ.c,516 :: 		}
-	GOTO        L_main51
-L_main52:
+	GOTO        L_main56
+L_main57:
 ;DZ.c,518 :: 		delay_ms_manual(1000);
 	MOVLW       232
 	MOVWF       FARG_delay_ms_manual_ms+0 
@@ -1920,8 +1945,8 @@ L_main52:
 	MOVWF       FARG_delay_ms_manual_ms+1 
 	CALL        _delay_ms_manual+0, 0
 ;DZ.c,520 :: 		}
-	GOTO        L_main48
-L_main49:
+	GOTO        L_main53
+L_main54:
 ;DZ.c,521 :: 		lcd_cmd_my(0x01);
 	MOVLW       1
 	MOVWF       FARG_lcd_cmd_my_cmd+0 
@@ -1932,10 +1957,23 @@ L_main49:
 	MOVLW       0
 	MOVWF       FARG_delay_ms_manual_ms+1 
 	CALL        _delay_ms_manual+0, 0
-;DZ.c,524 :: 		j = 1;
+;DZ.c,523 :: 		}
+L_main49:
+L_main47:
+;DZ.c,524 :: 		lcd_cmd_my(0x01);
+	MOVLW       1
+	MOVWF       FARG_lcd_cmd_my_cmd+0 
+	CALL        _lcd_cmd_my+0, 0
+;DZ.c,525 :: 		delay_ms_manual(100);
+	MOVLW       100
+	MOVWF       FARG_delay_ms_manual_ms+0 
+	MOVLW       0
+	MOVWF       FARG_delay_ms_manual_ms+1 
+	CALL        _delay_ms_manual+0, 0
+;DZ.c,527 :: 		j = 1;
 	MOVLW       1
 	MOVWF       main_j_L0+0 
-;DZ.c,525 :: 		lcd_char_my(1,j,'R'); j++;
+;DZ.c,528 :: 		lcd_char_my(1,j,'R'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVLW       1
@@ -1944,7 +1982,7 @@ L_main49:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,526 :: 		lcd_char_my(1,j,'E'); j++;
+;DZ.c,529 :: 		lcd_char_my(1,j,'E'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -1953,39 +1991,12 @@ L_main49:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,527 :: 		lcd_char_my(1,j,'S'); j++;
+;DZ.c,530 :: 		lcd_char_my(1,j,'S'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
 	MOVWF       FARG_lcd_char_my_column+0 
 	MOVLW       83
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,528 :: 		lcd_char_my(1,j,'T'); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       84
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,529 :: 		lcd_char_my(1,j,'A'); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       65
-	MOVWF       FARG_lcd_char_my_cmd+0 
-	CALL        _lcd_char_my+0, 0
-	INCF        main_j_L0+0, 1 
-;DZ.c,530 :: 		lcd_char_my(1,j,'R'); j++;
-	MOVLW       1
-	MOVWF       FARG_lcd_char_my_row+0 
-	MOVF        main_j_L0+0, 0 
-	MOVWF       FARG_lcd_char_my_column+0 
-	MOVLW       82
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
@@ -1998,7 +2009,34 @@ L_main49:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,532 :: 		lcd_char_my(1,j,'I'); j++;
+;DZ.c,532 :: 		lcd_char_my(1,j,'A'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       65
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,533 :: 		lcd_char_my(1,j,'R'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       82
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,534 :: 		lcd_char_my(1,j,'T'); j++;
+	MOVLW       1
+	MOVWF       FARG_lcd_char_my_row+0 
+	MOVF        main_j_L0+0, 0 
+	MOVWF       FARG_lcd_char_my_column+0 
+	MOVLW       84
+	MOVWF       FARG_lcd_char_my_cmd+0 
+	CALL        _lcd_char_my+0, 0
+	INCF        main_j_L0+0, 1 
+;DZ.c,535 :: 		lcd_char_my(1,j,'I'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -2007,7 +2045,7 @@ L_main49:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,533 :: 		lcd_char_my(1,j,'N'); j++;
+;DZ.c,536 :: 		lcd_char_my(1,j,'N'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -2016,7 +2054,7 @@ L_main49:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,534 :: 		lcd_char_my(1,j,'G'); j++;
+;DZ.c,537 :: 		lcd_char_my(1,j,'G'); j++;
 	MOVLW       1
 	MOVWF       FARG_lcd_char_my_row+0 
 	MOVF        main_j_L0+0, 0 
@@ -2025,19 +2063,19 @@ L_main49:
 	MOVWF       FARG_lcd_char_my_cmd+0 
 	CALL        _lcd_char_my+0, 0
 	INCF        main_j_L0+0, 1 
-;DZ.c,536 :: 		lcd_cmd_my(0x01);
+;DZ.c,539 :: 		delay_ms_manual(2000);
+	MOVLW       208
+	MOVWF       FARG_delay_ms_manual_ms+0 
+	MOVLW       7
+	MOVWF       FARG_delay_ms_manual_ms+1 
+	CALL        _delay_ms_manual+0, 0
+;DZ.c,541 :: 		lcd_cmd_my(0x01);
 	MOVLW       1
 	MOVWF       FARG_lcd_cmd_my_cmd+0 
 	CALL        _lcd_cmd_my+0, 0
-;DZ.c,538 :: 		delay_ms_manual(1000);
-	MOVLW       232
-	MOVWF       FARG_delay_ms_manual_ms+0 
-	MOVLW       3
-	MOVWF       FARG_delay_ms_manual_ms+1 
-	CALL        _delay_ms_manual+0, 0
-;DZ.c,539 :: 		}
+;DZ.c,542 :: 		}
 	GOTO        L_main25
-;DZ.c,540 :: 		}
+;DZ.c,543 :: 		}
 L_end_main:
 	GOTO        $+0
 ; end of _main

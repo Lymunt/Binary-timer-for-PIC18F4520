@@ -46,12 +46,14 @@ Count=0
 VECTOR_MODE=0
 IVT_BASE=00000008
 [EXPANDED_NODES]
-0=DZ.mcppi
-Count=1
+0=ISP.mcppi
+1=Sources
+15=DZ.mcppi
+Count=3
 [LIB_EXPANDED_NODES]
 0=mikroE Libraries
 1=System Libraries
-Count=2
+Count=3
 [PROGRAMMER_TYPE]
 Value=mikroE mikroProg
 [CODEGRIP_OPTIONS]

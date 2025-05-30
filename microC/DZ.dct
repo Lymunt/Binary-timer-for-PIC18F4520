@@ -972,7 +972,6 @@ sdi_bit
 sdiv3232l
 sdo
 sdo_bit
-second_input
 sen
 sen_bit
 sendb
@@ -1290,6 +1289,7 @@ ua_bit
 uart_in
 uart_in_direction
 uart_init
+uart_input
 uart_out
 uart_out_direction
 uart_ready

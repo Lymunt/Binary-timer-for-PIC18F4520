@@ -40,25 +40,25 @@ sbit UART_OUT_Direction at TRISC6_bit;
 sbit UART_IN_Direction at TRISC7_bit;
 
 unsigned char uart_ready = 0;
-unsigned char second_input = 0;
+unsigned char uart_input = 0;
 
 
 
 void interrupt() {
  if (PIR1.RCIF == 1){
  uart_ready++;
- second_input = RCREG;
+ uart_input = RCREG;
  }
 }
 
 void timer_init(){
- T0CON = 0b00000000;
+ T0CON = 0x00;
 }
 
 void delay_40us() {
  T1CON.TMR1ON = 0;
  TMR1H = 0xFF;
- TMR1L = 0xD8;
+ TMR1L = 0x9C;
  PIR1.TMR1IF = 0;
  T1CON.TMR1ON = 1;
 
@@ -243,6 +243,7 @@ void uart_init(){
 
 void main() {
  unsigned char count = 0;
+ unsigned char second_input = 0;
  unsigned char i = 0;
 
  unsigned char j = 1;
@@ -281,10 +282,12 @@ void main() {
  delay_ms_manual(10);
 
  while(1){
+ delay_ms_manual(1000);
  i = 0;
  j = 0;
 
  second_input = 0;
+ uart_input = 0;
  input_value = 0;
  keyboard_result = 0;
  uart_ready = 0;
@@ -305,8 +308,6 @@ void main() {
  delay_ms_manual(10);
 
  while (keyboard_result !=0x12) {
- lcd_char_my(1, 6, k);
- k++;
 
  keyboard_result = check_keyboard();
 
@@ -378,9 +379,6 @@ void main() {
  lcd_char_my(1,j,':');
 
  while (1) {
- lcd_char_my(2, 10, k);
- k++;
-
  keyboard_result = check_keyboard();
  if(keyboard_result == 0x13){
  second_input = 255;
@@ -399,13 +397,17 @@ void main() {
  lcd_char_my(1,j,' '); j++;
  lcd_char_my(1,j,' '); j++;
  lcd_char_my(1,j,' '); j++;
+
+ to_binary(second_input, bin_str);
+ for (i = 0; i < 8; i++) lcd_char_my(2, i + 1, bin_str[i]);
+
  delay_ms_manual(2000);
  break;
  }
 
  if (uart_ready >0) {
-
- to_binary(second_input & 0xFF, bin_str);
+ second_input = uart_input;
+ to_binary(second_input, bin_str);
  for (i = 0; i < 8; i++) lcd_char_my(2, i + 1, bin_str[i]);
 
  j = 1;
@@ -435,6 +437,26 @@ void main() {
  lcd_cmd_my(0x01);
  delay_ms_manual(100);
 
+ if(second_input==count){
+ j = 1;
+ lcd_char_my(2, j, 'X');
+ j++;
+ lcd_char_my(2, j, '=');
+ j++;
+ lcd_char_my(2, j, 'Y');
+ j++;
+ delay_ms_manual(5000);
+ }else if(second_input<count){
+ j = 1;
+ lcd_char_my(2, j, 'X');
+ j++;
+ lcd_char_my(2, j, '<');
+ j++;
+ lcd_char_my(2, j, 'Y');
+ j++;
+ delay_ms_manual(5000);
+ }else{
+
  j = 1;
  lcd_char_my(1, j, 'B');
  j++;
@@ -463,28 +485,6 @@ void main() {
  lcd_char_my(2, i + 2, bin_str[i]);
  }
  delay_ms_manual(1000);
-
- if(second_input==count){
- j = 1;
- lcd_char_my(2, j, 'X');
- j++;
- lcd_char_my(2, j, '=');
- j++;
- lcd_char_my(2, j, 'Y');
- j++;
- delay_ms_manual(1000);
- }
-
- if(second_input<count){
- j = 1;
- lcd_char_my(2, j, 'X');
- j++;
- lcd_char_my(2, j, '<');
- j++;
- lcd_char_my(2, j, 'Y');
- j++;
- delay_ms_manual(1000);
- }
 
  while (count<second_input) {
  keyboard_result = check_keyboard();
@@ -521,6 +521,9 @@ void main() {
  }
  lcd_cmd_my(0x01);
  delay_ms_manual(100);
+ }
+ lcd_cmd_my(0x01);
+ delay_ms_manual(100);
 
  j = 1;
  lcd_char_my(1,j,'R'); j++;
@@ -534,8 +537,8 @@ void main() {
  lcd_char_my(1,j,'N'); j++;
  lcd_char_my(1,j,'G'); j++;
 
- lcd_cmd_my(0x01);
+ delay_ms_manual(2000);
 
- delay_ms_manual(1000);
+ lcd_cmd_my(0x01);
  }
 }

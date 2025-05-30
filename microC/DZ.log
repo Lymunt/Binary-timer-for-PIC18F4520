@@ -2,12 +2,13 @@
 hint: 0	1139	Available RAM: 1515 [bytes], Available ROM: 32768 [bytes]	 
 diagnostics: 0	122	Compilation Started	DZ.c
 hint: 182	1163	Variable 'bin_str' has been declared, but not used	DZ.c
-diagnostics: 540	123	Compiled Successfully	DZ.c
+diagnostics: 543	123	Compiled Successfully	DZ.c
 hint: 181	1164	Variable 'i' has been eliminated by optimizer	DZ.c
-diagnostics: 0	127	All files Compiled in 109 ms	 
+hint: 249	1164	Variable 'k' has been eliminated by optimizer	DZ.c
+diagnostics: 0	127	All files Compiled in 156 ms	 
 hint: 0	1144	Used RAM (bytes): 29 (2%)  Free RAM (bytes): 1486 (98%)	Used RAM (bytes): 29 (2%)  Free RAM (bytes): 1486 (98%)
-hint: 0	1144	Used ROM (bytes): 3052 (9%)  Free ROM (bytes): 29716 (91%)	Used ROM (bytes): 3052 (9%)  Free ROM (bytes): 29716 (91%)
+hint: 0	1144	Used ROM (bytes): 3118 (10%)  Free ROM (bytes): 29650 (90%)	Used ROM (bytes): 3118 (10%)  Free ROM (bytes): 29650 (90%)
 diagnostics: 0	125	Project Linked Successfully	DZ.mcppi
-diagnostics: 0	128	Linked in 32 ms	 
-diagnostics: 0	129	Project 'DZ.mcppi' completed: 297 ms	 
-diagnostics: 0	103	Finished successfully: 13 май 2025, 15:06:44	DZ.mcppi
+diagnostics: 0	128	Linked in 47 ms	 
+diagnostics: 0	129	Project 'DZ.mcppi' completed: 359 ms	 
+diagnostics: 0	103	Finished successfully: 30 май 2025, 14:02:03	DZ.mcppi

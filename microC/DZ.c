@@ -39,35 +39,35 @@ sbit UART_OUT_Direction at TRISC6_bit;
 sbit UART_IN_Direction at TRISC7_bit;
 
 unsigned char uart_ready = 0;
-unsigned char second_input = 0;
+unsigned char uart_input = 0;
 
 
 
 void interrupt() {
      if (PIR1.RCIF == 1){
         uart_ready++;
-        second_input =  RCREG;
+        uart_input =  RCREG;
      }
 }
 
 void timer_init(){
-     T0CON = 0b00000000;
+     T0CON = 0x00;
 }
 
 void delay_40us() {
-    T1CON.TMR1ON = 0;      // выключить таймер
+    T1CON.TMR1ON = 0;
     TMR1H = 0xFF;
-    TMR1L = 0xD8;          // preload = 65536 - 25 = 65511 > 0xFFD8 (25 тиков ? 0.4 мкс ? 40 мкс)
-    PIR1.TMR1IF = 0;       // сбросить флаг переполнения
-    T1CON.TMR1ON = 1;      // запустить таймер
+    TMR1L = 0x9C;
+    PIR1.TMR1IF = 0;
+    T1CON.TMR1ON = 1;
 
-    while (!PIR1.TMR1IF);  // ждать пока таймер переполнится
+    while (!PIR1.TMR1IF);
 }
 
 void delay_ms_manual(unsigned int ms) {
     unsigned int i, j;
     for (i = 0; i < ms; i++) {
-        for (j = 0; j < 25; j++) {  // 25 ? 40 мкс = 1 мс
+        for (j = 0; j < 25; j++) {  // 25 ? 40 ??? = 1 ??
             delay_40us();
         }
     }
@@ -242,6 +242,7 @@ void uart_init(){
 
 void main() {
      unsigned char count = 0;
+     unsigned char second_input = 0;
      unsigned char i = 0;
 
      unsigned char j = 1;
@@ -270,7 +271,7 @@ void main() {
      ROW_3_Direction =1;
 
      TRISD.B0 = 0;
-     
+
      timer_init();
 
      uart_init();
@@ -280,10 +281,12 @@ void main() {
      delay_ms_manual(10);
 
      while(1){
+              delay_ms_manual(1000);
               i = 0;
               j = 0;
 
               second_input = 0;
+              uart_input = 0;
               input_value = 0;
               keyboard_result = 0;
               uart_ready = 0;
@@ -304,8 +307,6 @@ void main() {
               delay_ms_manual(10);
 
               while (keyboard_result !=0x12) {
-                    lcd_char_my(1, 6, k);
-                    k++;
 
                     keyboard_result = check_keyboard();
 
@@ -377,9 +378,6 @@ void main() {
                     lcd_char_my(1,j,':');
 
                     while (1) {
-                          lcd_char_my(2, 10, k);
-                          k++;
-
                           keyboard_result = check_keyboard();
                           if(keyboard_result == 0x13){
                              second_input = 255;
@@ -398,13 +396,17 @@ void main() {
                              lcd_char_my(1,j,' '); j++;
                              lcd_char_my(1,j,' '); j++;
                              lcd_char_my(1,j,' '); j++;
+
+                             to_binary(second_input, bin_str);
+                                for (i = 0; i < 8; i++) lcd_char_my(2, i + 1, bin_str[i]);
+
                              delay_ms_manual(2000);
                              break;
                           }
 
                           if (uart_ready >0) {
-
-                                to_binary(second_input & 0xFF, bin_str);
+                                second_input = uart_input;
+                                to_binary(second_input, bin_str);
                                 for (i = 0; i < 8; i++) lcd_char_my(2, i + 1, bin_str[i]);
 
                                 j = 1;
@@ -434,35 +436,6 @@ void main() {
                     lcd_cmd_my(0x01);
                     delay_ms_manual(100);
 
-                    j = 1;
-                    lcd_char_my(1, j, 'B');
-                    j++;
-                    lcd_char_my(1, j, 'I');
-                    j++;
-                    lcd_char_my(1, j, 'N');
-                    j++;
-                    j++;
-                    lcd_char_my(1, j, 'C');
-                    j++;
-                    lcd_char_my(1, j, 'O');
-                    j++;
-                    lcd_char_my(1, j, 'U');
-                    j++;
-                    lcd_char_my(1, j, 'N');
-                    j++;
-                    lcd_char_my(1, j, 'T');
-                    j++;
-                    lcd_char_my(1, j, 'E');
-                    j++;
-                    lcd_char_my(1, j, 'R');
-
-                    to_binary(count, bin_str);
-
-                    for (i = 0; i < 8; i++) {
-                        lcd_char_my(2, i + 2, bin_str[i]);
-                    }
-                    delay_ms_manual(1000);
-                    
                     if(second_input==count){
                         j = 1;
                         lcd_char_my(2, j, 'X');
@@ -471,10 +444,8 @@ void main() {
                         j++;
                         lcd_char_my(2, j, 'Y');
                         j++;
-                        delay_ms_manual(1000);
-                    }
-                    
-                    if(second_input<count){
+                        delay_ms_manual(5000);
+                    }else if(second_input<count){
                         j = 1;
                         lcd_char_my(2, j, 'X');
                         j++;
@@ -482,45 +453,77 @@ void main() {
                         j++;
                         lcd_char_my(2, j, 'Y');
                         j++;
-                        delay_ms_manual(1000);
-                    }
+                        delay_ms_manual(5000);
+                    }else{
 
-                    while (count<second_input) {
-                          keyboard_result = check_keyboard();
-                          if(keyboard_result == 0x13){
-                             j = 1;
-                             lcd_char_my(1,j,'B'); j++;
-                             lcd_char_my(1,j,'R'); j++;
-                             lcd_char_my(1,j,'E'); j++;
-                             lcd_char_my(1,j,'A'); j++;
-                             lcd_char_my(1,j,'K'); j++;
-                             lcd_char_my(1,j,'I'); j++;
-                             lcd_char_my(1,j,'N'); j++;
-                             lcd_char_my(1,j,'G'); j++;
-                             lcd_char_my(1,j,' '); j++;
-
-                             lcd_char_my(1,j,' '); j++;
-                             lcd_char_my(1,j,' '); j++;
-                             lcd_char_my(1,j,' '); j++;
-                             lcd_char_my(1,j,' '); j++;
-                             lcd_char_my(1,j,' '); j++;
-                             delay_ms_manual(5000);
-                             break;
-                          }
-                          count++;
+                          j = 1;
+                          lcd_char_my(1, j, 'B');
+                          j++;
+                          lcd_char_my(1, j, 'I');
+                          j++;
+                          lcd_char_my(1, j, 'N');
+                          j++;
+                          j++;
+                          lcd_char_my(1, j, 'C');
+                          j++;
+                          lcd_char_my(1, j, 'O');
+                          j++;
+                          lcd_char_my(1, j, 'U');
+                          j++;
+                          lcd_char_my(1, j, 'N');
+                          j++;
+                          lcd_char_my(1, j, 'T');
+                          j++;
+                          lcd_char_my(1, j, 'E');
+                          j++;
+                          lcd_char_my(1, j, 'R');
 
                           to_binary(count, bin_str);
 
                           for (i = 0; i < 8; i++) {
                               lcd_char_my(2, i + 2, bin_str[i]);
                           }
-
                           delay_ms_manual(1000);
 
+                          while (count<second_input) {
+                                keyboard_result = check_keyboard();
+                                if(keyboard_result == 0x13){
+                                    j = 1;
+                                    lcd_char_my(1,j,'B'); j++;
+                                    lcd_char_my(1,j,'R'); j++;
+                                    lcd_char_my(1,j,'E'); j++;
+                                    lcd_char_my(1,j,'A'); j++;
+                                    lcd_char_my(1,j,'K'); j++;
+                                    lcd_char_my(1,j,'I'); j++;
+                                    lcd_char_my(1,j,'N'); j++;
+                                    lcd_char_my(1,j,'G'); j++;
+                                    lcd_char_my(1,j,' '); j++;
+
+                                    lcd_char_my(1,j,' '); j++;
+                                    lcd_char_my(1,j,' '); j++;
+                                    lcd_char_my(1,j,' '); j++;
+                                    lcd_char_my(1,j,' '); j++;
+                                    lcd_char_my(1,j,' '); j++;
+                                    delay_ms_manual(5000);
+                                    break;
+                                }
+                                count++;
+
+                                to_binary(count, bin_str);
+
+                                for (i = 0; i < 8; i++) {
+                                    lcd_char_my(2, i + 2, bin_str[i]);
+                                    }
+
+                                    delay_ms_manual(1000);
+
+                                }
+                                lcd_cmd_my(0x01);
+                                delay_ms_manual(100);
                     }
                     lcd_cmd_my(0x01);
                     delay_ms_manual(100);
-                    
+
                     j = 1;
                     lcd_char_my(1,j,'R'); j++;
                     lcd_char_my(1,j,'E'); j++;
@@ -532,9 +535,9 @@ void main() {
                     lcd_char_my(1,j,'I'); j++;
                     lcd_char_my(1,j,'N'); j++;
                     lcd_char_my(1,j,'G'); j++;
-                    
-                    lcd_cmd_my(0x01);
 
-                    delay_ms_manual(1000);
+                    delay_ms_manual(2000);
+
+                    lcd_cmd_my(0x01);
      }
 }
